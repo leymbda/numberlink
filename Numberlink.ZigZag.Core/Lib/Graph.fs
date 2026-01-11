@@ -165,6 +165,12 @@ module Graph =
             | _ -> None
         )
 
+    /// Get the IDs of neighbors of a vertex by its ID, or an empty list if the vertex does not exist.
+    let getNeighborIds vertexId (graph: Graph<'v, 'e>) =
+        AdjacencyList.getNeighbors vertexId graph.AdjacencyList
+        |> Map.toList
+        |> List.map fst
+
     /// Map over the vertices of the graph.
     let mapVertices f (graph: Graph<'v, 'e>) =
         let vertices = Map.map (fun _ v -> f v) graph.Vertices

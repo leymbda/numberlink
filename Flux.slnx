@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Non Solution Files/">
     <File Path=".gitignore" />
+    <File Path="AGENTS.md" />
     <File Path="README.md" />
   </Folder>
   <Project Path="Flux.Tui/Flux.Tui.fsproj" Id="18bb7f03-e222-4081-9124-05bf255896f5" />

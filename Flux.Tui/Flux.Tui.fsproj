@@ -24,8 +24,4 @@
     <ProjectReference Include="..\Numberlink.ZigZag.Core\Numberlink.ZigZag.Core.fsproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
 </Project>

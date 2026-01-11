@@ -297,17 +297,36 @@ module Template =
         /// Ensure that all continuous lines end with terminals
         let lineTerminationConstraint: Constraint<TemplateVertex, TemplateEdge, GeneratorDomain> =
             fun vertexId currentDomain collapsed graph ->
-                currentDomain // TODO: Implement
+                // Check neighbors to see if any would lose their ability to be terminated. May cause issues with a
+                // situation where many lines expect to terminate as a single vertex, but hopefully backtracking can
+                // eventually resolve such situations.
+
+                // TODO: Implement
+
+                currentDomain
 
         /// Ensure continuous lines do not have available shortcuts
         let lineShortcutConstraint: Constraint<TemplateVertex, TemplateEdge, GeneratorDomain> =
             fun vertexId currentDomain collapsed graph ->
-                currentDomain // TODO: Implement
+                // Iterate over potential domains to invalidate those that violate. Check either direction the new
+                // domain would take the line, as it could connect two lines together. Build a list of vertices the
+                // line passes through. At each step, check if any of the neighbors are in the list. Don't treat the
+                // potentially two lines being connected as separate, as they could pass each other elsewhere. This
+                // should also handle preventing cycles with no terminals.
 
-        /// Multiply domain weights by multipliers defined in the generator state, proportional to other possible states
+                // TODO: Implement
+
+                currentDomain
+
+        /// Multiply domain weights to ensure an appropriate distribution of types
         let weightMultiplierConstraint: Constraint<TemplateVertex, TemplateEdge, GeneratorDomain> =
             fun _ currentDomain _ _ ->
-                currentDomain // TODO: Implement
+                // Make the proportion of weight assigned to terminals lower than that of paths so that lines are more
+                // likely to continue rather than make many tiny ones.
+
+                // TODO: Implement
+
+                currentDomain
 
         // TODO: Add extra constraints as needed e.g. bridge reflection constraint
 
