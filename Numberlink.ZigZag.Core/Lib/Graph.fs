@@ -17,7 +17,9 @@ module AdjacencyList =
 
     /// Get the neighbors of a vertex by its ID, or an empty map if the vertex does not exist.
     let getNeighbors vertexId (adjacencyList: AdjacencyList) =
-        Map.tryFind vertexId adjacencyList.Relations |> Option.defaultValue Map.empty
+        adjacencyList.Relations
+        |> Map.tryFind vertexId
+        |> Option.defaultValue Map.empty
 
     /// Get the vertices connected by an edge by the edge's ID.
     let getEdgeVertices edgeId (adjacencyList: AdjacencyList) =
@@ -98,19 +100,20 @@ module Graph =
 
     /// Add a vertex to the graph.
     let addVertex vertexId vertex (graph: Graph<'v, 'e>) =
-        { graph with Vertices = Map.add vertexId vertex graph.Vertices }
+        let vertices = Map.add vertexId vertex graph.Vertices
+
+        { graph with Vertices = vertices }
         
     /// Remove a vertex and its associated edges from the graph.
     let removeVertex vertexId (graph: Graph<'v, 'e>) =
         let edges =
-            AdjacencyList.getNeighbors vertexId graph.AdjacencyList
+            graph.AdjacencyList
+            |> AdjacencyList.getNeighbors vertexId
             |> Map.fold (fun edges _ edgeId -> Map.remove edgeId edges) graph.Edges
 
         let vertices = Map.remove vertexId graph.Vertices
     
-        let adjacencyList =
-            graph.AdjacencyList
-            |> AdjacencyList.removeVertex vertexId
+        let adjacencyList = AdjacencyList.removeVertex vertexId graph.AdjacencyList
 
         { graph with Vertices = vertices; Edges = edges; AdjacencyList = adjacencyList }
 
@@ -134,8 +137,7 @@ module Graph =
 
     /// Get all vertices in the graph as a sequence of (ID, vertex) pairs.
     let getVertices (graph: Graph<'v, 'e>) =
-        graph.Vertices
-        |> Map.toSeq
+        Map.toSeq graph.Vertices
 
     /// Get an edge by its ID.
     let getEdge edgeId (graph: Graph<'v, 'e>) =
@@ -143,12 +145,12 @@ module Graph =
 
     /// Get all edges in the graph as a sequence of (ID, edge) pairs.
     let getEdges (graph: Graph<'v, 'e>) =
-        graph.Edges
-        |> Map.toSeq
+        Map.toSeq graph.Edges
 
     /// Get the vertices connected by an edge by the edge's ID.
     let getEdgeVertices edgeId (graph: Graph<'v, 'e>) =
-        AdjacencyList.getEdgeVertices edgeId graph.AdjacencyList
+        graph.AdjacencyList
+        |> AdjacencyList.getEdgeVertices edgeId
         |> Option.bind (fun (fromId, toId) ->
             match getVertex fromId graph, getVertex toId graph with
             | Some fromVertex, Some toVertex -> Some (fromVertex, toVertex)
@@ -157,7 +159,8 @@ module Graph =
 
     /// Get the relations of neighbors of a vertex by its ID, or an empty seq if the vertex does not exist.
     let getNeighbors vertexId (graph: Graph<'v, 'e>) =
-        AdjacencyList.getNeighbors vertexId graph.AdjacencyList
+        graph.AdjacencyList
+        |> AdjacencyList.getNeighbors vertexId
         |> Map.toSeq
         |> Seq.choose (fun (neighborId, edgeId) ->
             match getEdge edgeId graph, getVertex neighborId graph with
@@ -167,22 +170,19 @@ module Graph =
 
     /// Get the IDs of neighbors of a vertex by its ID, or an empty list if the vertex does not exist.
     let getNeighborIds vertexId (graph: Graph<'v, 'e>) =
-        AdjacencyList.getNeighbors vertexId graph.AdjacencyList
+        graph.AdjacencyList
+        |> AdjacencyList.getNeighbors vertexId
         |> Map.toList
         |> List.map fst
 
     /// Map over the vertices of the graph.
     let mapVertices f (graph: Graph<'v, 'e>) =
         let vertices = Map.map (fun k v -> f k v) graph.Vertices
-        let edges = graph.Edges
-        let adjacencyList = graph.AdjacencyList
 
-        { Vertices = vertices; Edges = edges; AdjacencyList = adjacencyList }
+        { Vertices = vertices; Edges = graph.Edges; AdjacencyList = graph.AdjacencyList }
 
     /// Map over the edges of the graph.
     let mapEdges f (graph: Graph<'v, 'e>) =
-        let vertices = graph.Vertices
         let edges = Map.map (fun k e -> f k e) graph.Edges
-        let adjacencyList = graph.AdjacencyList
 
-        { Vertices = vertices; Edges = edges; AdjacencyList = adjacencyList }
+        { Vertices = graph.Vertices; Edges = edges; AdjacencyList = graph.AdjacencyList }

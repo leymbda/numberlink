@@ -1,0 +1,24 @@
+﻿<Project Sdk="MSTest.Sdk/4.0.1">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TestingExtensionsProfile>AllMicrosoft</TestingExtensionsProfile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Lib\GraphTests.fs" />
+    <Compile Include="Lib\WaveFunctionCollapseTests.fs" />
+    <Compile Include="TemplateTests.fs" />
+    <Compile Include="GeneratorTests.fs" />
+    <Compile Include="LevelTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Lib\" />
+  </ItemGroup>
+
+</Project>
