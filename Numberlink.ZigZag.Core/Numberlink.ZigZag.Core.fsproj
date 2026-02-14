@@ -6,9 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Extensions\Guid.fs" />
-    <Compile Include="Extensions\List.fs" />
-    <Compile Include="Extensions\Map.fs" />
     <Compile Include="Lib\Graph.fs" />
     <Compile Include="Lib\WaveFunctionCollapse.fs" />
     <Compile Include="Position.fs" />
@@ -20,7 +17,5 @@
   <ItemGroup>
     <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />
   </ItemGroup>
-
-  <ItemGroup />
 
 </Project>

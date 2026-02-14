@@ -69,7 +69,7 @@ module Generator =
                 |> Map.ofList
 
             | TemplateVertex.Bridge edges ->
-                Map.singleton (GeneratorDomain.Bridge edges) 1.0
+                Map.empty |> Map.add (GeneratorDomain.Bridge edges) 1.0
         )
 
     /// Ensure vertices collapse into a compatible state with neighboring collapsed vertices
