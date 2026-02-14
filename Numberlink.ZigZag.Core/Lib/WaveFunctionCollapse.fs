@@ -94,8 +94,9 @@ module WaveFunctionCollapse =
         let candidates =
             wfc.Domains
             |> Map.toList
-            |> List.choose (fun (id, domain) -> 
-                Domain.entropy domain |> Option.map (fun e -> id, e))
+            |> List.filter (fun (vertexId, _) -> not (wfc.Collapsed.ContainsKey vertexId))
+            |> List.choose (fun (vertexId, domain) -> 
+                Domain.entropy domain |> Option.map (fun e -> vertexId, e))
 
         match candidates with
         | [] -> None

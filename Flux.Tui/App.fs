@@ -134,3 +134,22 @@ let program level =
 
     while not exit.Value do
         Thread.Sleep(250)
+
+let program level =
+    let setState = fun model dispatch ->
+        let ctx = view model dispatch
+
+        () // TODO: Handle console rendering here using the result of view as context for what to draw
+
+    let subscribe' model =
+        Sub.batch [
+            [] // TODO: Add subscription for console inputs here (async loop with short sleep)
+            subscribe model
+        ]
+
+    Program.mkProgram init update view
+    |> Program.withSubscription subscribe'
+    |> Program.withSetState setState
+    |> Program.runWith level
+
+    // TODO: Blocking loop until some exit condition is met (from imperative renderer used in above functions)

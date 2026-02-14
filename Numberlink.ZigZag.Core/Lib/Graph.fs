@@ -173,7 +173,7 @@ module Graph =
 
     /// Map over the vertices of the graph.
     let mapVertices f (graph: Graph<'v, 'e>) =
-        let vertices = Map.map (fun _ v -> f v) graph.Vertices
+        let vertices = Map.map (fun k v -> f k v) graph.Vertices
         let edges = graph.Edges
         let adjacencyList = graph.AdjacencyList
 
@@ -182,7 +182,7 @@ module Graph =
     /// Map over the edges of the graph.
     let mapEdges f (graph: Graph<'v, 'e>) =
         let vertices = graph.Vertices
-        let edges = Map.map (fun _ e -> f e) graph.Edges
+        let edges = Map.map (fun k e -> f k e) graph.Edges
         let adjacencyList = graph.AdjacencyList
 
         { Vertices = vertices; Edges = edges; AdjacencyList = adjacencyList }
