@@ -11,12 +11,16 @@
     <Compile Include="Extensions\Map.fs" />
     <Compile Include="Lib\Graph.fs" />
     <Compile Include="Lib\WaveFunctionCollapse.fs" />
+    <Compile Include="Position.fs" />
     <Compile Include="Template.fs" />
+    <Compile Include="Generator.fs" />
     <Compile Include="Level.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>

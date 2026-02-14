@@ -3,7 +3,6 @@ module Flux.Tui.App
 open Elmish
 open Flux.Tui.Lib
 open Numberlink.ZigZag.Core
-open Numberlink.ZigZag.Core.Lib
 open System
 open System.Drawing
 open System.Threading
@@ -17,7 +16,7 @@ type Move =
 type Model = {
     TerminalRenderer: TerminalRenderer
     ConsoleLock: Lock
-    Level: Level
+    Level: Level<Orthogonal>
     Selected: bool
     Position: int * int // TODO: How to handle other types of coordinate systems?
 }
@@ -45,10 +44,7 @@ let update msg model: Model * Cmd<Msg> =
         let x = fst model.Position + rx
         let y = snd model.Position + ry
 
-        let valid =
-            model.Level.Template.Graph
-            |> Graph.getVertices
-            |> Seq.exists (fun (_, v) -> match v.Position with | Orthogonal(px, py) -> px = x && py = y)
+        let valid = Map.exists (fun _ ({ X = px; Y = py }) -> px = x && py = y) model.Level.Template.Positions
         
         if valid then { model with Position = x, y }, Cmd.ofMsg Render
         else model, Cmd.none
@@ -121,19 +117,6 @@ let subscribe model: Sub<Msg> =
 
             { new IDisposable with member _.Dispose() = cts.Cancel() }
     ]
-
-let program level =
-    Console.CursorVisible <- false
-
-    let exit = ref false
-
-    Program.mkProgram init update view
-    |> Program.withSubscription subscribe
-    |> Program.withTermination ((=) Exit) (fun _ -> exit.Value <- true)
-    |> Program.runWith level
-
-    while not exit.Value do
-        Thread.Sleep(250)
 
 let program level =
     let setState = fun model dispatch ->

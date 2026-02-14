@@ -1,11 +1,12 @@
 namespace Numberlink.ZigZag.Core
 
+open FsToolkit.ErrorHandling
 open Numberlink.ZigZag.Core.Lib
 open System
 
-type Level = {
+type Level<'P> = {
     Id: Guid
-    Template: Template
+    Template: Template<'P>
     Links: Guid list list
 }
 
@@ -15,12 +16,15 @@ module Level =
         { Id = levelId; Template = template; Links = links }
 
     /// Generate a new level based on the given template.
-    let generate random levelId (template: Template) =
-        Template.generate random template
-        |> Result.map (fun collapsed ->
-            collapsed
-            |> Map.iter (fun vertexId state ->
-                match state with
+    let generate random levelId (template: Template<'P>) = result {
+        let! domains =
+            Generator.generate random template
+            |> Result.requireSome "Failed to generate level from template"
+
+        // TODO: Remove above temporary debug output (or consider how to add this observability togglable)
+
+        domains |> Map.iter (fun vertexId state ->
+            match state with
                 | GeneratorDomain.Terminal edge ->
                     let neighbor =
                         Graph.getNeighbors vertexId template.Graph
@@ -50,10 +54,9 @@ module Level =
                         |> Seq.toArray
 
                     printfn "V %A: Path connecting %A" vertexId neighbors
-            )
-
-            // TODO: Remove above temporary debug output (or consider how to add this observability togglable)
-            
-            { Id = levelId; Template = template; Links = [] }
         )
-        
+
+        // TODO: Create links based off domains
+
+        return { Id = levelId; Template = template; Links = [] }
+    }
