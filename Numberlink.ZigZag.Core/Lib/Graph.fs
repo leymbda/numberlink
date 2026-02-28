@@ -1,188 +1,230 @@
 namespace Numberlink.ZigZag.Core.Lib
 
-open System
+open FsToolkit.ErrorHandling
 
-type AdjacencyList = {
-    Relations: Map<Guid, Map<Guid, Guid>>
-    EdgePairs: Map<Guid, Guid * Guid>
-}
-
-module AdjacencyList =
-    /// Create an empty adjacency list.
-    let empty =
-        let relations = Map.empty
-        let edgePairs = Map.empty
-
-        { Relations = relations; EdgePairs = edgePairs }
-
-    /// Get the neighbors of a vertex by its ID, or an empty map if the vertex does not exist.
-    let getNeighbors vertexId (adjacencyList: AdjacencyList) =
-        adjacencyList.Relations
-        |> Map.tryFind vertexId
-        |> Option.defaultValue Map.empty
-
-    /// Get the vertices connected by an edge by the edge's ID.
-    let getEdgeVertices edgeId (adjacencyList: AdjacencyList) =
-        Map.tryFind edgeId adjacencyList.EdgePairs
-
-    /// Bidirectionally link two vertices in the adjacency list with the given edge.
-    let link fromId toId edgeId (adjacencyList: AdjacencyList): AdjacencyList =
-        let addLink vertexId1 vertexId2 edgeId al =
-            let neighbors =
-                getNeighbors vertexId1 al
-                |> Map.add vertexId2 edgeId
-
-            let relations = Map.add vertexId1 neighbors al.Relations
-            let edgePairs = Map.add edgeId (vertexId1, vertexId2) al.EdgePairs
-
-            { al with Relations = relations; EdgePairs = edgePairs }
-
-        adjacencyList
-        |> addLink fromId toId edgeId
-        |> addLink toId fromId edgeId
-
-    /// Bidirectionally unlink two vertices in the adjacency list.
-    let unlink fromId toId (adjacencyList: AdjacencyList): AdjacencyList =
-        let removeLink vertexId1 vertexId2 al =
-            let neighbors =
-                getNeighbors vertexId1 al
-                |> Map.remove vertexId2
-
-            let relations =
-                if Map.isEmpty neighbors then Map.remove vertexId1 al.Relations
-                else Map.add vertexId1 neighbors al.Relations
-
-            let edgePairs =
-                al.Relations
-                |> Map.tryFind vertexId1
-                |> Option.bind (Map.tryFind vertexId2)
-                |> Option.map (fun edgeId -> Map.remove edgeId al.EdgePairs)
-                |> Option.defaultValue al.EdgePairs
-
-            { al with Relations = relations; EdgePairs = edgePairs }
-
-        adjacencyList
-        |> removeLink fromId toId
-        |> removeLink toId fromId
-
-    /// Remove a vertex from all neighbors.
-    let removeVertex vertexId (adjacencyList: AdjacencyList): AdjacencyList =
-        getNeighbors vertexId adjacencyList
-        |> Map.fold (fun al neighborId _ -> unlink vertexId neighborId al) adjacencyList
-
-    /// Remove an edge from the adjacency list.
-    let removeEdge edgeId (adjacencyList: AdjacencyList): AdjacencyList =
-        match Map.tryFind edgeId adjacencyList.EdgePairs with
-        | Some (fromId, toId) -> unlink fromId toId adjacencyList
-        | None -> adjacencyList
-
-type Relation<'v, 'e> = {
-    VertexId: Guid
-    Vertex: 'v
-    EdgeId: Guid
-    Edge: 'e
-}
-
-type Graph<'v, 'e> = {
-    Vertices: Map<Guid, 'v>
-    Edges: Map<Guid, 'e>
-    AdjacencyList: AdjacencyList
+type Graph<'v, 'e when 'v : comparison and 'e : comparison> = {
+    Vertices: Map<'v, Set<'e>>
+    Edges: Map<'e, 'v * 'v>
 }
 
 module Graph =
     /// Create an empty graph.
-    let empty<'v, 'e> =
-        let vertices = Map.empty<Guid, 'v>
-        let edges = Map.empty<Guid, 'e>
-        let adjacencyList = AdjacencyList.empty
+    let empty<'v, 'e when 'v : comparison and 'e : comparison>: Graph<'v, 'e> = {
+        Vertices = Map.empty
+        Edges = Map.empty
+    }
     
-        { Vertices = vertices; Edges = edges; AdjacencyList = adjacencyList }
+    /// Check if the property graph is empty (i.e. has no vertices).
+    let isEmpty (graph: Graph<'v, 'e>) =
+        Map.isEmpty graph.Vertices
 
-    /// Add a vertex to the graph.
-    let addVertex vertexId vertex (graph: Graph<'v, 'e>) =
-        let vertices = Map.add vertexId vertex graph.Vertices
+    /// Get the edges incident to a vertex, returning None if the vertex is not found.
+    let getIncidentEdges vertex (graph: Graph<'v, 'e>) =
+        Map.tryFind vertex graph.Vertices
 
-        { graph with Vertices = vertices }
+    /// Get the neighboring vertices of a vertex, returning None if the vertex is not found.
+    let neighbors vertex (graph: Graph<'v, 'e>) =
+        graph
+        |> getIncidentEdges vertex
+        |> Option.map (Set.map (fun edge ->
+            let (v1, v2) = Map.find edge graph.Edges
+            if v1 = vertex then v2 else v1
+        ))
+
+    /// Get the degree of a vertex, returning None if the vertex is not found.
+    let degree vertex (graph: Graph<'v, 'e>) =
+        graph
+        |> getIncidentEdges vertex
+        |> Option.map Set.count
+
+    /// Check if a vertex exists in the graph.
+    let containsVertex vertex (graph: Graph<'v, 'e>) =
+        Map.containsKey vertex graph.Vertices
+
+    /// Check if an edge exists in the graph.
+    let containsEdge edge (graph: Graph<'v, 'e>) =
+        Map.containsKey edge graph.Edges
+
+    /// Get the endpoints of an edge, returning None if the edge is not found.
+    let getEndpoints edge (graph: Graph<'v, 'e>) =
+        Map.tryFind edge graph.Edges
+
+    /// Check if two vertices are adjacent, returning false if either vertex is not found.
+    let isAdjacent vertex1 vertex2 (graph: Graph<'v, 'e>) =
+        graph
+        |> neighbors vertex1
+        |> Option.map (Set.contains vertex2)
+        |> Option.defaultValue false
+
+    /// Get the edges connecting two adjacent vertices, returning an empty set if either vertex does not exist or they
+    /// have no connecting edges.
+    let findEdges vertex1 vertex2 (graph: Graph<'v, 'e>) =
+        graph
+        |> getIncidentEdges vertex1
+        |> Option.map (Set.filter (fun edge ->
+            let (v1, v2) = Map.find edge graph.Edges
+            (v1 = vertex1 && v2 = vertex2) || (v1 = vertex2 && v2 = vertex1)
+        ))
+        |> Option.defaultValue Set.empty
         
-    /// Remove a vertex and its associated edges from the graph.
-    let removeVertex vertexId (graph: Graph<'v, 'e>) =
-        let edges =
-            graph.AdjacencyList
-            |> AdjacencyList.getNeighbors vertexId
-            |> Map.fold (fun edges _ edgeId -> Map.remove edgeId edges) graph.Edges
+    /// Add a vertex to the graph, doing nothing if it already exists.
+    let addVertex vertex (graph: Graph<'v, 'e>) =
+        match containsVertex vertex graph with
+        | true -> graph
+        | false ->
+            let vertices = Map.add vertex Set.empty graph.Vertices
 
-        let vertices = Map.remove vertexId graph.Vertices
-    
-        let adjacencyList = AdjacencyList.removeVertex vertexId graph.AdjacencyList
+            { graph with Vertices = vertices }
 
-        { graph with Vertices = vertices; Edges = edges; AdjacencyList = adjacencyList }
+    /// Add an edge to the graph, returning an error containing the missing vertices.
+    let addEdge edge vertex1 vertex2 (graph: Graph<'v, 'e>) = result {
+        let undefinedVertices = List.filter (fun v -> not <| Map.containsKey v graph.Vertices) [vertex1; vertex2]
+        do! Result.requireEmpty (Set.ofList undefinedVertices) undefinedVertices
 
-    /// Add an edge to the graph, connecting two vertices.
-    let addEdge fromVertexId toVertexId edgeId edge (graph: Graph<'v, 'e>) =
-        let edges = Map.add edgeId edge graph.Edges
-        let adjacencyList = AdjacencyList.link fromVertexId toVertexId edgeId graph.AdjacencyList
-            
-        { graph with Edges = edges; AdjacencyList = adjacencyList }
+        let vertices =
+            graph.Vertices
+            |> Map.add vertex1 (Set.add edge (Map.find vertex1 graph.Vertices))
+            |> Map.add vertex2 (Set.add edge (Map.find vertex2 graph.Vertices))
+
+        let edges = Map.add edge (vertex1, vertex2) graph.Edges
+
+        return { graph with Vertices = vertices; Edges = edges }
+    }
+
+    /// Remove a vertex and all its associated edges from the graph, doing nothing if it doesn't exist.
+    let removeVertex vertex (graph: Graph<'v, 'e>) =
+        match getIncidentEdges vertex graph with
+        | None -> graph
+        | Some edges ->
+            let vertices =
+                graph.Vertices
+                |> Map.remove vertex
+                |> Map.map (fun _ -> Set.filter (fun edge -> not <| Set.contains edge edges))
+
+            let edges = Map.filter (fun edge _ -> not <| Set.contains edge edges) graph.Edges
+
+            { graph with Vertices = vertices; Edges = edges }
 
     /// Remove an edge from the graph.
-    let removeEdge edgeId (graph: Graph<'v, 'e>) =
-        let edges = Map.remove edgeId graph.Edges
-        let adjacencyList = AdjacencyList.removeEdge edgeId graph.AdjacencyList
-            
-        { graph with Edges = edges; AdjacencyList = adjacencyList }
+    let removeEdge edge (graph: Graph<'v, 'e>) =
+        let vertices = Map.map (fun _ edges -> Set.remove edge edges) graph.Vertices
+        let edges = Map.remove edge graph.Edges
 
-    /// Get a vertex by its ID.
-    let getVertex vertexId (graph: Graph<'v, 'e>) =
-        Map.tryFind vertexId graph.Vertices
+        { graph with Vertices = vertices; Edges = edges }
 
-    /// Get all vertices in the graph as a sequence of (ID, vertex) pairs.
-    let getVertices (graph: Graph<'v, 'e>) =
-        Map.toSeq graph.Vertices
+    /// Get the vertices of the graph.
+    let vertices (graph: Graph<'v, 'e>) =
+        graph.Vertices
+        |> Map.keys
+        |> Set.ofSeq
 
-    /// Get an edge by its ID.
-    let getEdge edgeId (graph: Graph<'v, 'e>) =
-        Map.tryFind edgeId graph.Edges
+    /// Get the edges of the graph.
+    let edges (graph: Graph<'v, 'e>) =
+        graph.Edges
+        |> Map.keys
+        |> Set.ofSeq
 
-    /// Get all edges in the graph as a sequence of (ID, edge) pairs.
-    let getEdges (graph: Graph<'v, 'e>) =
-        Map.toSeq graph.Edges
+    /// Get the total number of vertices in the graph.
+    let countVertices (graph: Graph<'v, 'e>) =
+        Map.count graph.Vertices
 
-    /// Get the vertices connected by an edge by the edge's ID.
-    let getEdgeVertices edgeId (graph: Graph<'v, 'e>) =
-        graph.AdjacencyList
-        |> AdjacencyList.getEdgeVertices edgeId
-        |> Option.bind (fun (fromId, toId) ->
-            match getVertex fromId graph, getVertex toId graph with
-            | Some fromVertex, Some toVertex -> Some (fromVertex, toVertex)
-            | _ -> None
-        )
+    /// Get the total number of edges in the graph.
+    let countEdges (graph: Graph<'v, 'e>) =
+        Map.count graph.Edges
 
-    /// Get the relations of neighbors of a vertex by its ID, or an empty seq if the vertex does not exist.
-    let getNeighbors vertexId (graph: Graph<'v, 'e>) =
-        graph.AdjacencyList
-        |> AdjacencyList.getNeighbors vertexId
-        |> Map.toSeq
-        |> Seq.choose (fun (neighborId, edgeId) ->
-            match getEdge edgeId graph, getVertex neighborId graph with
-            | Some edge, Some vertex -> Some { VertexId = neighborId; Vertex = vertex; EdgeId = edgeId; Edge = edge }
-            | _ -> None
-        )
+    /// Fold over the vertices of the graph.
+    let foldVertices folder state (graph: Graph<'v, 'e>) =
+        Map.fold (fun acc vertex _ -> folder acc vertex) state graph.Vertices
 
-    /// Get the IDs of neighbors of a vertex by its ID, or an empty list if the vertex does not exist.
-    let getNeighborIds vertexId (graph: Graph<'v, 'e>) =
-        graph.AdjacencyList
-        |> AdjacencyList.getNeighbors vertexId
-        |> Map.toList
-        |> List.map fst
+    /// Fold over the edges of the graph.
+    let foldEdges folder state (graph: Graph<'v, 'e>) =
+        Map.fold (fun acc edge _ -> folder acc edge) state graph.Edges
 
-    /// Map over the vertices of the graph.
-    let mapVertices f (graph: Graph<'v, 'e>) =
-        let vertices = Map.map (fun k v -> f k v) graph.Vertices
+    /// Iterate over the vertices of the graph.
+    let iterVertices action (graph: Graph<'v, 'e>) =
+        Map.iter (fun vertex _ -> action vertex) graph.Vertices
 
-        { Vertices = vertices; Edges = graph.Edges; AdjacencyList = graph.AdjacencyList }
+    /// Iterate over the edges of the graph.
+    let iterEdges action (graph: Graph<'v, 'e>) =
+        Map.iter (fun edge _ -> action edge) graph.Edges
 
-    /// Map over the edges of the graph.
-    let mapEdges f (graph: Graph<'v, 'e>) =
-        let edges = Map.map (fun k e -> f k e) graph.Edges
+    /// Check if any vertex satisfies a predicate.
+    let existsVertex predicate (graph: Graph<'v, 'e>) =
+        Map.exists (fun vertex _ -> predicate vertex) graph.Vertices
 
-        { Vertices = graph.Vertices; Edges = edges; AdjacencyList = graph.AdjacencyList }
+    /// Check if any edge satisfies a predicate.
+    let existsEdge predicate (graph: Graph<'v, 'e>) =
+        Map.exists (fun edge _ -> predicate edge) graph.Edges
+
+    /// Check if all vertices satisfy a predicate.
+    let forallVertices predicate (graph: Graph<'v, 'e>) =
+        Map.forall (fun vertex _ -> predicate vertex) graph.Vertices
+
+    /// Check if all edges satisfy a predicate.
+    let forallEdges predicate (graph: Graph<'v, 'e>) =
+        Map.forall (fun edge _ -> predicate edge) graph.Edges
+
+    /// Filter the vertices of the graph, removing those that do not satisfy a predicate (and therefore any connected
+    /// edges).
+    let filterVertices predicate (graph: Graph<'v, 'e>) =
+        graph.Vertices
+        |> Map.keys
+        |> Seq.filter (fun vertex -> not <| predicate vertex)
+        |> Seq.fold (fun acc vertex -> removeVertex vertex acc) graph
+
+    /// Filter the edges of the graph, removing those that do not satisfy a predicate.
+    let filterEdges predicate (graph: Graph<'v, 'e>) =
+        graph.Edges
+        |> Map.keys
+        |> Seq.filter (fun edge -> not <| predicate edge)
+        |> Seq.fold (fun acc edge -> removeEdge edge acc) graph
+
+    /// Create the subgraph induced by a set of vertices, containing only those vertices and the edges whose both
+    /// endpoints are within the set.
+    let inducedSubgraph (vertexSet: Set<'v>) (graph: Graph<'v, 'e>) =
+        let verticesToRemove = Set.filter (fun vertex -> not <| Set.contains vertex vertexSet) (vertices graph)
+        Set.fold (fun acc vertex -> removeVertex vertex acc) graph verticesToRemove
+
+    /// Breadth-first search starting from a vertex, returning vertices in BFS order. The predicate takes (in order of
+    /// curried argument) the current vertex, the edge being traversed, and the neighboring vertex, and will skip any
+    /// neighbor for which the predicate returns false.
+    let bfs start predicate (graph: Graph<'v, 'e>) =
+        let rec loop queue visited = seq {
+            match queue with
+            | [] -> ()
+            | vertex :: rest ->
+                yield vertex
+
+                let newNeighbors =
+                    graph
+                    |> getIncidentEdges vertex
+                    |> Option.defaultValue Set.empty
+                    |> Set.toList
+                    |> List.choose (fun edge ->
+                        let (v1, v2) = Map.find edge graph.Edges
+                        let nv = if v1 = vertex then v2 else v1
+
+                        Some nv |> Option.filter (fun nv ->
+                            not <| Set.contains nv visited &&
+                            not <| List.contains nv queue &&
+                            predicate vertex edge nv
+                        )
+                    )
+                    |> List.distinct
+
+                let newQueue = rest @ newNeighbors
+                let newVisited = Set.add vertex visited
+
+                yield! loop newQueue newVisited
+        }
+        
+        match containsVertex start graph with
+        | true -> loop [start] Set.empty
+        | false -> Seq.empty
+
+    /// Check if there is a path between two vertices, returning false if either vertex is not found. The predicate
+    /// filters the search to support different notions of connectivity.
+    let isConnected vertex1 vertex2 predicate (graph: Graph<'v, 'e>) =
+        graph
+        |> bfs vertex1 predicate
+        |> Seq.contains vertex2
