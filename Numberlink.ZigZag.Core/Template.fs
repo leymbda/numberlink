@@ -3,10 +3,12 @@ namespace Numberlink.ZigZag.Core
 open Numberlink.ZigZag.Core.Lib
 open System
 
+[<RequireQualifiedAccess>]
 type TemplateVertex =
     | Unobserved
     | Bridge of edges: (Guid * Guid) list
-
+    
+[<RequireQualifiedAccess>]
 type TemplateEdge =
     | Path
     | Warp
@@ -23,7 +25,7 @@ module Template =
 
     /// Add an unobserved vertex to the template graph to generate levels off.
     let addUnobserved vertexId position (template: Template<'P>) =
-        let graph = Graph.addVertex vertexId Unobserved template.Graph
+        let graph = Graph.addVertex vertexId TemplateVertex.Unobserved template.Graph
         let positions = Map.add vertexId position template.Positions
 
         { template with Graph = graph; Positions = positions }
@@ -32,15 +34,15 @@ module Template =
     /// the first item is the ID of the edge to create and the second is the ID of the vertex to connect to. The tuples
     /// are grouped in pairs to define the connections for each bridge segment.
     let addBridge vertexId (edges: ((Guid * Guid) * (Guid * Guid)) list) position (template: Template<'P>) =
-        let vertex = Bridge (List.map (fun ((e1, _), (e2, _)) -> (e1, e2)) edges)
+        let vertex = TemplateVertex.Bridge (List.map (fun ((e1, _), (e2, _)) -> (e1, e2)) edges)
 
         let graph =
             Graph.addVertex vertexId vertex template.Graph
             |> List.foldBack
                 (fun ((e1, v1), (e2, v2)) graph ->
                     graph
-                    |> Graph.addEdge vertexId v1 e1 Path
-                    |> Graph.addEdge vertexId v2 e2 Path
+                    |> Graph.addEdge vertexId v1 e1 TemplateEdge.Path
+                    |> Graph.addEdge vertexId v2 e2 TemplateEdge.Path
                 )
                 edges
 
@@ -57,13 +59,13 @@ module Template =
 
     /// Add a possible path edge between two vertices in the template graph.
     let addPath fromVertexId toVertexId edgeId (template: Template<'P>) =
-        let graph = Graph.addEdge fromVertexId toVertexId edgeId Path template.Graph
+        let graph = Graph.addEdge fromVertexId toVertexId edgeId TemplateEdge.Path template.Graph
         
         { template with Graph = graph }
 
     /// Add a warp edge between two vertices in the template graph.
     let addWarp fromVertexId toVertexId edgeId (template: Template<'P>) =
-        let graph = Graph.addEdge fromVertexId toVertexId edgeId Warp template.Graph
+        let graph = Graph.addEdge fromVertexId toVertexId edgeId TemplateEdge.Warp template.Graph
         
         { template with Graph = graph }
 

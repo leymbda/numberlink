@@ -161,6 +161,8 @@ module Generator =
 
             // TODO: Implement
 
+            // Is this needed or is it already supported from the above neighbour consistency constraint?
+
             currentDomain
 
     /// Ensure continuous lines do not have available shortcuts (cycles)
@@ -250,7 +252,7 @@ module Generator =
         ]
 
     /// Generate valid domains for each vertex in the template.
-    let generate random (template: Template<'P>) =
+    let generate random levelId (template: Template<'P>) = result {
         // TODO: Validation:
         //       - Ensure any vertices exist
         //       - Ensure all vertices have the same position type
@@ -258,7 +260,27 @@ module Generator =
         //       - Ensure bridges have an even number of connections
         //       - Ensure bridge edges are properly formed with pairs (probably integrate into above check)
         //       - Ensure warps aren't stacked
+         
+        let! domains =
+            template.Graph
+            |> WaveFunctionCollapse.init random initialDomains constraints
+            |> WaveFunctionCollapse.run
+            |> Result.requireSome "Failed to generate valid domains for template graph"
 
-        template.Graph
-        |> WaveFunctionCollapse.init random initialDomains constraints
-        |> WaveFunctionCollapse.run
+        let graph =
+            template.Graph
+            |> Graph.mapEdges (fun _ -> function
+                | TemplateEdge.Path -> LevelEdge.Path
+                | TemplateEdge.Warp -> LevelEdge.Warp
+            )
+            |> Graph.mapVertices (fun vertexId -> function
+                | TemplateVertex.Unobserved ->
+                    match Map.find vertexId domains with
+                    | GeneratorDomain.Terminal edge -> LevelVertex.Terminal edge
+                    | GeneratorDomain.Path (e1, e2) -> LevelVertex.Path (e1, e2)
+                    | GeneratorDomain.Bridge edges -> LevelVertex.Bridge edges
+                | TemplateVertex.Bridge edges -> LevelVertex.Bridge edges
+            )
+
+        return Level.create levelId graph template.Positions
+    }

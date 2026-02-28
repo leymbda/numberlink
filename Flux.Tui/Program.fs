@@ -1,4 +1,6 @@
-﻿open Numberlink.ZigZag.Core
+﻿open FsToolkit.ErrorHandling
+open Numberlink.ZigZag.Core
+open Numberlink.ZigZag.Core.Lib
 open System
 
 let seed = (new Random()).Next()
@@ -26,11 +28,25 @@ let template = // 3x3 donut shape
 for _ in 0..9 do Console.WriteLine()
 
 let level =
-    Level.generate random (Guid("00000000-0000-0000-0000-000000000000")) template
+    LevelOld.generate random (Guid("00000000-0000-0000-0000-000000000000")) template
     |> Result.defaultWith (fun err ->
         printfn "Error generating level: %s" err
         exit 1
     )
+
+//let t x y (level: LevelOld<Orthogonal>) = result {
+//    let! id =
+//        level.Template.Positions
+//        |> Map.tryFindKey (fun _ p -> p.X = x && p.Y = y)
+//        |> Result.requireSome (sprintf "No vertex at position (%d, %d)" x y)
+
+//    let! v =
+//        level.Template.Graph
+//        |> Graph.getVertex id
+//        |> Result.requireSome (sprintf "No vertex with id %A" id)
+
+//    level.
+//}
 
 level.Template.Positions |> Map.iter (fun vertexId position ->
     printfn "Vertex %A position (%d, %d)" vertexId position.X position.Y

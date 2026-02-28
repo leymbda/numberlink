@@ -16,7 +16,7 @@ type Move =
 type Model = {
     TerminalRenderer: TerminalRenderer
     ConsoleLock: Lock
-    Level: Level<Orthogonal>
+    Level: LevelOld<Orthogonal>
     Selected: bool
     Position: int * int // TODO: How to handle other types of coordinate systems?
 }

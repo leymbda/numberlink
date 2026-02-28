@@ -9,9 +9,9 @@
     <Compile Include="Lib\Graph.fs" />
     <Compile Include="Lib\WaveFunctionCollapse.fs" />
     <Compile Include="Position.fs" />
+    <Compile Include="Level.fs" />
     <Compile Include="Template.fs" />
     <Compile Include="Generator.fs" />
-    <Compile Include="Level.fs" />
   </ItemGroup>
 
   <ItemGroup>
