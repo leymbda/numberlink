@@ -22,6 +22,16 @@ module Graph =
     let getIncidentEdges vertex (graph: Graph<'v, 'e>) =
         Map.tryFind vertex graph.Vertices
 
+    /// Get edge/neighbor pairs for all edges incident to a vertex, returning an empty set if the vertex is not found.
+    let incidentNeighbors vertex (graph: Graph<'v, 'e>) =
+        graph
+        |> getIncidentEdges vertex
+        |> Option.defaultValue Set.empty
+        |> Set.map (fun edge ->
+            let (v1, v2) = Map.find edge graph.Edges
+            edge, if v1 = vertex then v2 else v1
+        )
+
     /// Get the neighboring vertices of a vertex, returning None if the vertex is not found.
     let neighbors vertex (graph: Graph<'v, 'e>) =
         graph
@@ -189,7 +199,7 @@ module Graph =
     /// curried argument) the current vertex, the edge being traversed, and the neighboring vertex, and will skip any
     /// neighbor for which the predicate returns false.
     let bfs start predicate (graph: Graph<'v, 'e>) =
-        let rec loop queue visited = seq {
+        let rec loop queue seen = seq {
             match queue with
             | [] -> ()
             | vertex :: rest ->
@@ -197,29 +207,19 @@ module Graph =
 
                 let newNeighbors =
                     graph
-                    |> getIncidentEdges vertex
-                    |> Option.defaultValue Set.empty
-                    |> Set.toList
-                    |> List.choose (fun edge ->
-                        let (v1, v2) = Map.find edge graph.Edges
-                        let nv = if v1 = vertex then v2 else v1
+                    |> incidentNeighbors vertex
+                    |> Set.fold (fun acc (edge, nv) ->
+                        match not (Set.contains nv seen) && predicate vertex edge nv with
+                        | true -> nv :: acc
+                        | false -> acc
+                    ) []
 
-                        Some nv |> Option.filter (fun nv ->
-                            not <| Set.contains nv visited &&
-                            not <| List.contains nv queue &&
-                            predicate vertex edge nv
-                        )
-                    )
-                    |> List.distinct
-
-                let newQueue = rest @ newNeighbors
-                let newVisited = Set.add vertex visited
-
-                yield! loop newQueue newVisited
+                let seen = List.fold (fun s nv -> Set.add nv s) seen newNeighbors
+                yield! loop (rest @ newNeighbors) seen
         }
         
         match containsVertex start graph with
-        | true -> loop [start] Set.empty
+        | true -> loop [start] (Set.singleton start)
         | false -> Seq.empty
 
     /// Check if there is a path between two vertices, returning false if either vertex is not found. The predicate
