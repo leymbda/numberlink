@@ -8,12 +8,6 @@
   <ItemGroup>
     <Compile Include="Lib\Graph.fs" />
     <Compile Include="lib\PropertyGraph.fs" />
-    <Compile Include="Lib\GraphOld.fs" />
-    <Compile Include="Lib\WaveFunctionCollapse.fs" />
-    <Compile Include="Position.fs" />
-    <Compile Include="Level.fs" />
-    <Compile Include="Template.fs" />
-    <Compile Include="Generator.fs" />
   </ItemGroup>
 
   <ItemGroup>
