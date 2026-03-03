@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Numberlink.ZigZag.Solver\Numberlink.ZigZag.Solver.fsproj" />
+    <ProjectReference Include="..\..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />
   </ItemGroup>
 
 </Project>

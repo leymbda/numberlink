@@ -6,13 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Primitives.fs" />
-    <Compile Include="Position.fs" />
-    <Compile Include="Level.fs" />
+    <Compile Include="Template.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />
+    <ProjectReference Include="..\Numberlink.ZigZag.Core\Numberlink.ZigZag.Core.fsproj" />
+    <ProjectReference Include="..\Numberlink.ZigZag.Solver\Numberlink.ZigZag.Solver.fsproj" />
   </ItemGroup>
 
 </Project>

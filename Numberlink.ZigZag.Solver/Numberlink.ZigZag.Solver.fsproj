@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />
     <ProjectReference Include="..\Numberlink.ZigZag.Core\Numberlink.ZigZag.Core.fsproj" />
   </ItemGroup>
 

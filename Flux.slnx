@@ -2,12 +2,17 @@
   <Folder Name="/Non Solution Files/">
     <File Path=".gitignore" />
     <File Path="AGENTS.md" />
+    <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="Tests/FSharp.Collections.Graphs.Tests.Unit/FSharp.Collections.Graphs.Tests.Unit.fsproj" Id="25562f02-ba21-4993-a0d2-5a0a262e1b97" />
     <Project Path="Tests/Numberlink.ZigZag.Core.Tests.Unit/Numberlink.ZigZag.Core.Tests.Unit.fsproj" Id="e4870629-8554-45cd-a3a2-3ccebc164f94" />
+    <Project Path="Tests/Numberlink.ZigZag.Generator.Tests.Unit/Numberlink.ZigZag.Generator.Tests.Unit.fsproj" Id="814a0a98-d2eb-4caf-96e1-3915e8e4f8e9" />
     <Project Path="Tests/Numberlink.ZigZag.Solver.Tests.Unit/Numberlink.ZigZag.Solver.Tests.Unit.fsproj" Id="81d71ff1-0ebd-41c7-9db9-ed44189465d4" />
   </Folder>
+  <Project Path="FSharp.Collections.Graphs/FSharp.Collections.Graphs.fsproj" Id="15d1e858-4edc-4897-b961-0933366ae317" />
   <Project Path="Numberlink.ZigZag.Core/Numberlink.ZigZag.Core.fsproj" Id="d14da3c0-875b-49b4-a9cb-57b7271a958e" />
+  <Project Path="Numberlink.ZigZag.Generator/Numberlink.ZigZag.Generator.fsproj" Id="ad60af81-18c5-4d10-acaf-87b1ec4cfe69" />
   <Project Path="Numberlink.ZigZag.Solver/Numberlink.ZigZag.Solver.fsproj" Id="95474275-6bfd-4e98-8ed3-c90a61af882e" />
 </Solution>

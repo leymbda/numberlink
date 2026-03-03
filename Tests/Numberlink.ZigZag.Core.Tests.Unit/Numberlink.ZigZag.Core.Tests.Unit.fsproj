@@ -12,4 +12,8 @@
     <Compile Include="MSTestSettings.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Numberlink.ZigZag.Core\Numberlink.ZigZag.Core.fsproj" />
+  </ItemGroup>
+
 </Project>

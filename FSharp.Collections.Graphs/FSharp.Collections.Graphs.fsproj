@@ -6,13 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Primitives.fs" />
-    <Compile Include="Position.fs" />
-    <Compile Include="Level.fs" />
+    <Compile Include="Graph.fs" />
+    <Compile Include="PropertyGraph.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />
+    <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />
   </ItemGroup>
 
 </Project>

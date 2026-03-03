@@ -1,4 +1,4 @@
-namespace Numberlink.ZigZag.Core.Lib
+namespace FSharp.Collections.Graphs
 
 open FsToolkit.ErrorHandling
 
