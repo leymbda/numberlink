@@ -1,0 +1,16 @@
+{
+  "image": "mcr.microsoft.com/dotnet/sdk:10.0",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "dotnet restore && gh extension install github/gh-copilot",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ionide.ionide-fsharp",
+        "github.copilot",
+        "github.copilot-chat"
+      ]
+    }
+  }
+}
