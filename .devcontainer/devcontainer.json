@@ -3,7 +3,8 @@
   "features": {
     "ghcr.io/devcontainers/features/copilot-cli:1": {}
   },
-  "postCreateCommand": "dotnet restore",
+  "updateContentCommand": "dotnet restore",
+  "postCreateCommand": "dotnet build -v q",
   "customizations": {
     "vscode": {
       "extensions": [
