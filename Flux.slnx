@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/Non Solution Files/">
-    <File Path=".devcontainer/devcontainer.json" />
     <File Path=".gitignore" />
     <File Path="AGENTS.md" />
     <File Path="global.json" />

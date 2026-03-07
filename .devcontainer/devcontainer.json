@@ -10,7 +10,13 @@
       "extensions": [
         "ionide.ionide-fsharp",
         "github.copilot-chat"
-      ]
+      ],
+      "settings": {
+        "task.allowAutomaticTasks": "on"
+      }
     }
+  },
+  "remoteEnv": {
+    "COPILOT_CLI_ALLOW_ALL": "true"
   }
 }

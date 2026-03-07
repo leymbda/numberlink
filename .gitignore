@@ -1,5 +1,8 @@
-.vs
-.vscode
 .idea
+.fake
+.vs
 bin
 obj
+
+.vscode/*
+!/.vscode/tasks.json
