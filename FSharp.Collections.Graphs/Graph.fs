@@ -14,7 +14,7 @@ module Graph =
         Edges = Map.empty
     }
     
-    /// Check if the property graph is empty (i.e. has no vertices).
+    /// Check if the graph is empty (i.e. has no vertices).
     let isEmpty (graph: Graph<'v, 'e>) =
         Map.isEmpty graph.Vertices
 
@@ -22,22 +22,21 @@ module Graph =
     let getIncidentEdges vertex (graph: Graph<'v, 'e>) =
         Map.tryFind vertex graph.Vertices
 
-    /// Get edge/neighbor pairs for all edges incident to a vertex, returning an empty set if the vertex is not found.
+    /// Get edge/neighbor pairs for all edges incident to a vertex, returning None if the vertex is not found.
     let incidentNeighbors vertex (graph: Graph<'v, 'e>) =
         graph
         |> getIncidentEdges vertex
-        |> Option.defaultValue Set.empty
-        |> Set.map (fun edge ->
-            let (v1, v2) = Map.find edge graph.Edges
+        |> Option.map (Set.map (fun edge ->
+            let v1, v2 = Map.find edge graph.Edges
             edge, if v1 = vertex then v2 else v1
-        )
+        ))
 
     /// Get the neighboring vertices of a vertex, returning None if the vertex is not found.
     let neighbors vertex (graph: Graph<'v, 'e>) =
         graph
         |> getIncidentEdges vertex
         |> Option.map (Set.map (fun edge ->
-            let (v1, v2) = Map.find edge graph.Edges
+            let v1, v2 = Map.find edge graph.Edges
             if v1 = vertex then v2 else v1
         ))
 
@@ -59,23 +58,20 @@ module Graph =
     let getEndpoints edge (graph: Graph<'v, 'e>) =
         Map.tryFind edge graph.Edges
 
-    /// Check if two vertices are adjacent, returning false if either vertex is not found.
+    /// Check if two vertices are adjacent, returning None if either vertex is not found.
     let isAdjacent vertex1 vertex2 (graph: Graph<'v, 'e>) =
         graph
         |> neighbors vertex1
         |> Option.map (Set.contains vertex2)
-        |> Option.defaultValue false
 
-    /// Get the edges connecting two adjacent vertices, returning an empty set if either vertex does not exist or they
-    /// have no connecting edges.
+    /// Get the edges connecting two adjacent vertices, returning None if either vertex is not found.
     let findEdges vertex1 vertex2 (graph: Graph<'v, 'e>) =
         graph
         |> getIncidentEdges vertex1
         |> Option.map (Set.filter (fun edge ->
-            let (v1, v2) = Map.find edge graph.Edges
+            let v1, v2 = Map.find edge graph.Edges
             (v1 = vertex1 && v2 = vertex2) || (v1 = vertex2 && v2 = vertex1)
         ))
-        |> Option.defaultValue Set.empty
         
     /// Add a vertex to the graph, doing nothing if it already exists.
     let addVertex vertex (graph: Graph<'v, 'e>) =
@@ -115,7 +111,7 @@ module Graph =
 
             { graph with Vertices = vertices; Edges = edges }
 
-    /// Remove an edge from the graph.
+    /// Remove an edge from the graph, doing nothing if it doesn't exist.
     let removeEdge edge (graph: Graph<'v, 'e>) =
         let vertices = Map.map (fun _ edges -> Set.remove edge edges) graph.Vertices
         let edges = Map.remove edge graph.Edges
@@ -143,47 +139,47 @@ module Graph =
         Map.count graph.Edges
 
     /// Fold over the vertices of the graph.
-    let foldVertices folder state (graph: Graph<'v, 'e>) =
+    let inline foldVertices folder state (graph: Graph<'v, 'e>) =
         Map.fold (fun acc vertex _ -> folder acc vertex) state graph.Vertices
 
     /// Fold over the edges of the graph.
-    let foldEdges folder state (graph: Graph<'v, 'e>) =
+    let inline foldEdges folder state (graph: Graph<'v, 'e>) =
         Map.fold (fun acc edge _ -> folder acc edge) state graph.Edges
 
     /// Iterate over the vertices of the graph.
-    let iterVertices action (graph: Graph<'v, 'e>) =
+    let inline iterVertices action (graph: Graph<'v, 'e>) =
         Map.iter (fun vertex _ -> action vertex) graph.Vertices
 
     /// Iterate over the edges of the graph.
-    let iterEdges action (graph: Graph<'v, 'e>) =
+    let inline iterEdges action (graph: Graph<'v, 'e>) =
         Map.iter (fun edge _ -> action edge) graph.Edges
 
     /// Check if any vertex satisfies a predicate.
-    let existsVertex predicate (graph: Graph<'v, 'e>) =
+    let inline existsVertex predicate (graph: Graph<'v, 'e>) =
         Map.exists (fun vertex _ -> predicate vertex) graph.Vertices
 
     /// Check if any edge satisfies a predicate.
-    let existsEdge predicate (graph: Graph<'v, 'e>) =
+    let inline existsEdge predicate (graph: Graph<'v, 'e>) =
         Map.exists (fun edge _ -> predicate edge) graph.Edges
 
     /// Check if all vertices satisfy a predicate.
-    let forallVertices predicate (graph: Graph<'v, 'e>) =
+    let inline forallVertices predicate (graph: Graph<'v, 'e>) =
         Map.forall (fun vertex _ -> predicate vertex) graph.Vertices
 
     /// Check if all edges satisfy a predicate.
-    let forallEdges predicate (graph: Graph<'v, 'e>) =
+    let inline forallEdges predicate (graph: Graph<'v, 'e>) =
         Map.forall (fun edge _ -> predicate edge) graph.Edges
 
     /// Filter the vertices of the graph, removing those that do not satisfy a predicate (and therefore any connected
     /// edges).
-    let filterVertices predicate (graph: Graph<'v, 'e>) =
+    let inline filterVertices predicate (graph: Graph<'v, 'e>) =
         graph.Vertices
         |> Map.keys
         |> Seq.filter (fun vertex -> not <| predicate vertex)
         |> Seq.fold (fun acc vertex -> removeVertex vertex acc) graph
 
     /// Filter the edges of the graph, removing those that do not satisfy a predicate.
-    let filterEdges predicate (graph: Graph<'v, 'e>) =
+    let inline filterEdges predicate (graph: Graph<'v, 'e>) =
         graph.Edges
         |> Map.keys
         |> Seq.filter (fun edge -> not <| predicate edge)
@@ -198,7 +194,7 @@ module Graph =
     /// Breadth-first search starting from a vertex, returning vertices in BFS order. The predicate takes (in order of
     /// curried argument) the current vertex, the edge being traversed, and the neighboring vertex, and will skip any
     /// neighbor for which the predicate returns false.
-    let bfs start predicate (graph: Graph<'v, 'e>) =
+    let inline bfs start predicate (graph: Graph<'v, 'e>) =
         let rec loop queue seen = seq {
             match queue with
             | [] -> ()
@@ -208,6 +204,7 @@ module Graph =
                 let newNeighbors =
                     graph
                     |> incidentNeighbors vertex
+                    |> Option.defaultValue Set.empty
                     |> Set.fold (fun acc (edge, nv) ->
                         match not (Set.contains nv seen) && predicate vertex edge nv with
                         | true -> nv :: acc
@@ -224,7 +221,7 @@ module Graph =
 
     /// Check if there is a path between two vertices, returning false if either vertex is not found. The predicate
     /// filters the search to support different notions of connectivity.
-    let isConnected vertex1 vertex2 predicate (graph: Graph<'v, 'e>) =
+    let inline isConnected vertex1 vertex2 predicate (graph: Graph<'v, 'e>) =
         graph
         |> bfs vertex1 predicate
         |> Seq.contains vertex2

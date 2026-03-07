@@ -26,18 +26,16 @@ module PropertyGraph =
         |> Graph.getIncidentEdges vertex
         |> Option.map (Set.map (fun edge -> edge, Map.find edge pg.Edges))
         
-    /// Get edge/neighbor pairs for all edges incident to a vertex, returning an empty set if the vertex is not found.
+    /// Get edge/neighbor pairs for all edges incident to a vertex, returning None if the vertex is not found.
     let incidentNeighbors vertex (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
-        pg
-        |> getIncidentEdges vertex
-        |> Option.defaultValue Set.empty
-        |> Set.map (fun (e, edata) ->
-            let (v1, v2) = Map.find e pg.Graph.Edges
-            let v = if v1 = vertex then v2 else v1
+        pg.Graph
+        |> Graph.incidentNeighbors vertex
+        |> Option.map (Set.map (fun (e, v) ->
+            let edata = Map.find e pg.Edges
             let vdata = Map.find v pg.Vertices
 
             e, edata, v, vdata
-        )
+        ))
 
     /// Get the neighboring vertices of a vertex, returning None if the vertex is not found.
     let neighbors vertex (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
@@ -63,28 +61,25 @@ module PropertyGraph =
         |> Graph.getEndpoints edge
         |> Option.map (fun (v1, v2) -> (v1, Map.find v1 pg.Vertices), (v2, Map.find v2 pg.Vertices))
         
-    /// Check if two vertices are adjacent, returning false if either vertex is not found.
+    /// Check if two vertices are adjacent, returning None if either vertex is not found.
     let isAdjacent vertex1 vertex2 (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Graph.isAdjacent vertex1 vertex2 pg.Graph
         
-    /// Get the edges connecting two adjacent vertices, returning an empty set if either vertex does not exist or they
-    /// have no connecting edges.
+    /// Get the edges connecting two adjacent vertices, returning an None if either vertex is not found.
     let findEdges vertex1 vertex2 (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         pg.Graph
         |> Graph.findEdges vertex1 vertex2
-        |> Set.map (fun edge -> edge, Map.find edge pg.Edges)
+        |> Option.map (Set.map (fun edge -> edge, Map.find edge pg.Edges))
 
-    /// Add a vertex to the property graph, doing nothing if it already exists.
+    /// Add a vertex to the property graph, replacing the data if it already exists.
     let addVertex vertex data (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
-        match containsVertex vertex pg with
-        | true -> pg
-        | false ->
-            let graph = Graph.addVertex vertex pg.Graph
-            let vertices = Map.add vertex data pg.Vertices
+        let graph = Graph.addVertex vertex pg.Graph
+        let vertices = Map.add vertex data pg.Vertices
 
-            { pg with Graph = graph; Vertices = vertices }
+        { pg with Graph = graph; Vertices = vertices }
         
-    /// Add an edge to the property graph, returning an error containing the missing vertices.
+    /// Add an edge to the property graph, replacing the data if it already exists or returning an error containing the
+    /// missing vertices.
     let addEdge edge data vertex1 vertex2 (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) = result {
         let! graph = Graph.addEdge edge vertex1 vertex2 pg.Graph
         let edges = Map.add edge data pg.Edges
@@ -103,7 +98,7 @@ module PropertyGraph =
 
             { pg with Graph = graph; Vertices = vertices; Edges = edges; }
         
-    /// Remove an edge from the property graph.
+    /// Remove an edge from the property graph, doing nothing if it doesn't exist.
     let removeEdge edge (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         let graph = Graph.removeEdge edge pg.Graph
         let edges = Map.remove edge pg.Edges
@@ -131,46 +126,46 @@ module PropertyGraph =
         Graph.countEdges pg.Graph
 
     /// Fold over the vertices of the property graph.
-    let foldVertices folder state (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline foldVertices folder state (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.fold folder state pg.Vertices
         
     /// Fold over the edges of the property graph.
-    let foldEdges folder state (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline foldEdges folder state (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.fold folder state pg.Edges
         
     /// Iterate over the vertices of the property graph.
-    let iterVertices action (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline iterVertices action (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.iter action pg.Vertices
         
     /// Iterate over the edges of the property graph.
-    let iterEdges action (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline iterEdges action (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.iter action pg.Edges
         
     /// Check if any vertex satisfies a predicate.
-    let existsVertex predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline existsVertex predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.exists predicate pg.Vertices
         
     /// Check if any edge satisfies a predicate.
-    let existsEdge predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline existsEdge predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.exists predicate pg.Edges
         
     /// Check if all vertices satisfy a predicate.
-    let forallVertices predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline forallVertices predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.forall predicate pg.Vertices
         
     /// Check if all edges satisfy a predicate.
-    let forallEdges predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline forallEdges predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.forall predicate pg.Edges
 
     /// Filter the vertices of the property graph, removing those that do not satisfy a predicate (and therefore any
     /// connected edges).
-    let filterVertices predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline filterVertices predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         pg.Vertices
         |> Map.filter (fun vertex data -> not <| predicate vertex data)
         |> Map.fold (fun acc vertex _ -> removeVertex vertex acc) pg
 
     /// Filter the edges of the property graph, removing those that do not satisfy a predicate.
-    let filterEdges predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline filterEdges predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         pg.Edges
         |> Map.filter (fun edge data -> not <| predicate edge data)
         |> Map.fold (fun acc edge _ -> removeEdge edge acc) pg
@@ -184,18 +179,20 @@ module PropertyGraph =
     /// Breadth-first search starting from a vertex, returning vertices in BFS order. The predicate takes (in order of
     /// curried argument) the current vertex, its data, the edge being traversed, its data, the neighboring vertex, and
     /// its data, and will skip any neighbor for which the predicate returns false.
-    let bfs start predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline bfs start predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         let predicate' v1 edge v2 =
             predicate v1 (Map.find v1 pg.Vertices) edge (Map.find edge pg.Edges) v2 (Map.find v2 pg.Vertices)
 
-        Graph.bfs start predicate' pg.Graph
+        pg.Graph
+        |> Graph.bfs start predicate'
+        |> Seq.map (fun vertex -> vertex, Map.find vertex pg.Vertices)
         
     /// Check if there is a path between two vertices, returning false if either vertex is not found. The predicate
     /// filters the search to support different notions of connectivity.
-    let isConnected vertex1 vertex2 predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline isConnected vertex1 vertex2 predicate (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         pg
         |> bfs vertex1 predicate
-        |> Seq.contains vertex2
+        |> Seq.exists (fun (v, _) -> v = vertex2)
 
     /// Get the data associated with a vertex, returning None if the vertex is not found.
     let getVertexData vertex (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
@@ -205,32 +202,32 @@ module PropertyGraph =
     let getEdgeData edge (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         Map.tryFind edge pg.Edges
 
-    /// Set the data associated with a vertex, doing nothing if the vertex is not found.
-    let setVertexData vertex data (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
-        match containsVertex vertex pg with
-        | false -> pg
-        | true ->
-            let vertices = Map.add vertex data pg.Vertices
+    /// Set the data associated with a vertex, returning the vertex key as an error if not found.
+    let setVertexData vertex data (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) = result {
+        do! Result.requireTrue vertex (containsVertex vertex pg)
 
-            { pg with Vertices = vertices }
+        let vertices = Map.add vertex data pg.Vertices
 
-    /// Set the data associated with an edge, doing nothing if the edge is not found.
-    let setEdgeData edge data (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
-        match containsEdge edge pg with
-        | false -> pg
-        | true ->
-            let edges = Map.add edge data pg.Edges
+        return { pg with Vertices = vertices }
+    }
 
-            { pg with Edges = edges }
+    /// Set the data associated with an edge, returning the edge key as an error if not found.
+    let setEdgeData edge data (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) = result {
+        do! Result.requireTrue edge (containsEdge edge pg)
+
+        let edges = Map.add edge data pg.Edges
+
+        return { pg with Edges = edges }
+    }
 
     /// Map a function over the vertex data of the property graph.
-    let mapVertices mapper (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline mapVertices mapper (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         let vertices = Map.map mapper pg.Vertices
 
         { pg with Vertices = vertices }
 
     /// Map a function over the edge data of the property graph.
-    let mapEdges mapper (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline mapEdges mapper (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         let edges = Map.map mapper pg.Edges
 
         { pg with Edges = edges }
