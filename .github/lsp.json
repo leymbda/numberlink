@@ -1,0 +1,12 @@
+{
+  "lspServers": {
+    "fsautocomplete": {
+      "command": "dotnet",
+      "args": ["fsautocomplete", "--stdio"],
+      "fileExtensions": {
+        ".fs": "fsharp",
+        ".fsx": "fsharp"
+      }
+    }
+  }
+}

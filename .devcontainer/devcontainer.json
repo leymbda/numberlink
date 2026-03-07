@@ -3,20 +3,13 @@
   "features": {
     "ghcr.io/devcontainers/features/copilot-cli:1": {}
   },
-  "updateContentCommand": "dotnet restore",
-  "postCreateCommand": "dotnet build -v q",
+  "updateContentCommand": "dotnet restore && dotnet tool restore",
   "customizations": {
     "vscode": {
       "extensions": [
         "ionide.ionide-fsharp",
         "github.copilot-chat"
-      ],
-      "settings": {
-        "task.allowAutomaticTasks": "on"
-      }
+      ]
     }
-  },
-  "remoteEnv": {
-    "COPILOT_CLI_ALLOW_ALL": "true"
   }
 }
