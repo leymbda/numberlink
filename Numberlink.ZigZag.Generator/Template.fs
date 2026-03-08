@@ -9,8 +9,8 @@ open Numberlink.ZigZag.Core
 [<Struct>]
 type TemplateVertex =
     | Empty
-    | Path
-    | Terminal of Terminal
+    | Cell of Line
+    | Terminal of Line
     | Bridge
     
 /// An edge in a template graph, representing a connection between cells.
@@ -19,7 +19,7 @@ type TemplateVertex =
 type TemplateEdge =
     | Path
     | Warp
-    | BridgeLane of BridgeLane
+    | BridgeLane of Line
     
 /// Constraints that can be applied to a template to guide the generation process.
 type TemplateConstraints = {

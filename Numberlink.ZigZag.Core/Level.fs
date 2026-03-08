@@ -6,8 +6,8 @@ open FSharp.Collections.Graphs
 [<RequireQualifiedAccess>]
 [<Struct>]
 type LevelVertex =
-    | Path
-    | Terminal of Terminal
+    | Cell of Line
+    | Terminal of Line
     | Bridge
     
 /// An edge in a level graph, representing a connection between cells.
@@ -16,7 +16,7 @@ type LevelVertex =
 type LevelEdge =
     | Path
     | Warp
-    | BridgeLane of BridgeLane
+    | BridgeLane of Line
     
 /// A complete Zig-Zag Numberlink level.
 type Level<'P> = {

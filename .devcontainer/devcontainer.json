@@ -8,8 +8,13 @@
     "vscode": {
       "extensions": [
         "ionide.ionide-fsharp",
+        "fernandoescolar.vscode-solution-explorer",
         "github.copilot-chat"
-      ]
+      ],
+      "settings": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4
+      }
     }
   }
 }

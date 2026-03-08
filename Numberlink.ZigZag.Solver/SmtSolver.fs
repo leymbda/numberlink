@@ -2,27 +2,33 @@ module Numberlink.ZigZag.Solver.SmtSolver
 
 open FSharp.Collections.Graphs
 open Microsoft.Z3
-
-/// An expression representing the ID of the line passing through a vertex.
-let private mkVertexExpr (vertex: int) (ctx: Context) =
-    ctx.MkIntConst(sprintf "v_%d" vertex) :> Expr
+open Numberlink.ZigZag.Core
 
 /// Solve the Numberlink puzzle using an SMT solver. Returns a set of tuples of vertex IDs and the ID of the line in
 /// which passes through it.
-let solve (pg: PropertyGraph<int, unit, int, unit>) = // TODO: This type should be replaced by some kind of empty representation of a level (e.g. solver template vs generator template?)
+let solve (level: Level<'P>) =
     try
         use ctx = new Context()
 
-        // TODO: Implement SMT encoding of the Numberlink puzzle here.
+        // Define variables for each vertex
+        let vertices =
+            level.Graph
+            |> PropertyGraph.vertices
+            |> Set.map (fun (vertex, _) -> vertex, ctx.MkInt $"v_{vertex}" :> Expr)
 
+        // Define variables for each edge
+        let edges =
+            level.Graph
+            |> PropertyGraph.edges
+            |> Set.map (fun (edge, _) -> edge, ctx.MkInt $"e_{edge}" :> Expr)
+
+        // Run solver and extract results
         let solver = ctx.MkSolver()
 
         match solver.Check() with
         | Status.SATISFIABLE ->
-            pg
-            |> PropertyGraph.vertices
-            |> Set.map (fun (vertex, _) ->
-                let vertexExpr = mkVertexExpr vertex ctx
+            vertices
+            |> Set.map (fun (vertex, vertexExpr) ->
                 let lineExpr = solver.Model.Eval(vertexExpr, true)
                 vertex, (lineExpr :?> IntNum).Int
             )
