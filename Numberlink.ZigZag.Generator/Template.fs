@@ -4,13 +4,16 @@ open FSharp.Collections.Graphs
 open FsToolkit.ErrorHandling
 open Numberlink.ZigZag.Core
 
+/// A primitive representing an edge of a bridge in a template, used to generate bridges without needing to specify the
+/// exact line that should pass through the lane.
+type [<Struct>] TemplateBridgeLane = TemplateBridgeLane of int
+
 /// A vertex in a template graph, representing a cell in a level.
 [<RequireQualifiedAccess>]
 [<Struct>]
 type TemplateVertex =
-    | Empty
-    | Cell of Line
-    | Terminal of Line
+    | Cell of Line option
+    | Terminal of Line option
     | Bridge
     
 /// An edge in a template graph, representing a connection between cells.
@@ -19,7 +22,7 @@ type TemplateVertex =
 type TemplateEdge =
     | Path
     | Warp
-    | BridgeLane of Line
+    | BridgeLane of TemplateBridgeLane
     
 /// Constraints that can be applied to a template to guide the generation process.
 type TemplateConstraints = {
