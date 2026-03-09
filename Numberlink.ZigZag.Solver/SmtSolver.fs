@@ -4,21 +4,20 @@ open FSharp.Collections.Graphs
 open Microsoft.Z3
 open Numberlink.ZigZag.Core
 
-/// Solve the Numberlink puzzle using an SMT solver. Returns a set of tuples of vertex IDs and the ID of the line in
-/// which passes through it.
-let solve (level: Level<'P>) =
+/// Solve the Numberlink puzzle using an SMT solver. Returns a set of tuples of edges and the line that passes through it.
+let solve (puzzle: Puzzle<'P>) =
     try
         use ctx = new Context()
 
         // Define variables for each vertex
         let vertices =
-            level.Graph
+            puzzle.Graph
             |> PropertyGraph.vertices
             |> Set.map (fun (vertex, _) -> vertex, ctx.MkInt $"v_{vertex}" :> Expr)
 
         // Define variables for each edge
         let edges =
-            level.Graph
+            puzzle.Graph
             |> PropertyGraph.edges
             |> Set.map (fun (edge, _) -> edge, ctx.MkInt $"e_{edge}" :> Expr)
 
@@ -27,12 +26,17 @@ let solve (level: Level<'P>) =
 
         match solver.Check() with
         | Status.SATISFIABLE ->
-            vertices
-            |> Set.map (fun (vertex, vertexExpr) ->
-                let lineExpr = solver.Model.Eval(vertexExpr, true)
-                vertex, (lineExpr :?> IntNum).Int
-            )
-            |> Ok
+            // edges
+            // |> Set.map (fun (edge, edgeExpr) ->
+            //     let lineExpr = solver.Model.Eval(edgeExpr, true)
+            //     let line = (lineExpr :?> IntNum).Int
+            //     let result = if line = 0 then None else Some (Line line)
+                
+            //     edge, result
+            // )
+            // |> Ok
+
+            Ok Flow.empty // TODO: Extract values from model and construct Flow
 
         | Status.UNSATISFIABLE ->
             Error "Unsatisfiable problem"

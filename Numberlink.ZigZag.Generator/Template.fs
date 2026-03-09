@@ -4,10 +4,6 @@ open FSharp.Collections.Graphs
 open FsToolkit.ErrorHandling
 open Numberlink.ZigZag.Core
 
-/// A primitive representing an edge of a bridge in a template, used to generate bridges without needing to specify the
-/// exact line that should pass through the lane.
-type [<Struct>] TemplateBridgeLane = TemplateBridgeLane of int
-
 /// A vertex in a template graph, representing a cell in a level.
 [<RequireQualifiedAccess>]
 [<Struct>]
@@ -20,9 +16,9 @@ type TemplateVertex =
 [<RequireQualifiedAccess>]
 [<Struct>]
 type TemplateEdge =
-    | Path
+    | Segment
     | Warp
-    | BridgeLane of TemplateBridgeLane
+    | BridgeLane of Lane
     
 /// Constraints that can be applied to a template to guide the generation process.
 type TemplateConstraints = {
@@ -77,6 +73,8 @@ module Template =
 
     /// Add an edge with the specified type between two vertices.
     let addEdge edge kind vertex1 vertex2 (template: Template<'P>) = result {
+        // TODO: Prevent multiple edges between the same vertices
+        
         let! graph = PropertyGraph.addEdge edge kind vertex1 vertex2 template.Graph
 
         return { template with Graph = graph }

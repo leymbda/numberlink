@@ -5,8 +5,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Primitives.fs" />
-    <Compile Include="Level.fs" />
-    <Compile Include="OrthogonalLevel.fs" />
+    <Compile Include="Geometry.fs" />
+    <Compile Include="Flow.fs" />
+    <Compile Include="Puzzle.fs" />
+    <Compile Include="Solution.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />
