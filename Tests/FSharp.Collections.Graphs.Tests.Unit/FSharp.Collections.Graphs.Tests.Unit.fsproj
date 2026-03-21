@@ -1,5 +1,4 @@
 <Project Sdk="MSTest.Sdk/4.0.1">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -7,13 +6,10 @@
     <Nullable>enable</Nullable>
     <TestingExtensionsProfile>AllMicrosoft</TestingExtensionsProfile>
   </PropertyGroup>
-
   <ItemGroup>
-    <Compile Include="MSTestSettings.fs" />
+    <Compile Include="GraphTests.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />
   </ItemGroup>
-
 </Project>

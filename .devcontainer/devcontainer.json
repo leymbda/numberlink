@@ -9,7 +9,8 @@
       "extensions": [
         "ionide.ionide-fsharp",
         "fernandoescolar.vscode-solution-explorer",
-        "github.copilot-chat"
+        "github.copilot-chat",
+        "ms-dotnettools.csdevkit"
       ],
       "settings": {
         "editor.insertSpaces": true,
