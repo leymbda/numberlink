@@ -21,15 +21,15 @@ module PropertyGraph =
         Graph.isEmpty pg.Graph
 
     /// Get the edges incident to a vertex, returning None if the vertex is not found.
-    let getIncidentEdges vertex (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let incidentEdges vertex (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         pg.Graph
-        |> Graph.getIncidentEdges vertex
+        |> Graph.incidentEdges vertex
         |> Option.map (Set.map (fun edge -> edge, Map.find edge pg.Edges))
         
     /// Get edge/neighbor pairs for all edges incident to a vertex, returning None if the vertex is not found.
-    let incidentNeighbors vertex (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let adjacency vertex (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         pg.Graph
-        |> Graph.incidentNeighbors vertex
+        |> Graph.adjacency vertex
         |> Option.map (Set.map (fun (e, v) ->
             let edata = Map.find e pg.Edges
             let vdata = Map.find v pg.Vertices
@@ -66,10 +66,21 @@ module PropertyGraph =
         Graph.isAdjacent vertex1 vertex2 pg.Graph
         
     /// Get the edges connecting two adjacent vertices, returning an None if either vertex is not found.
-    let findEdges vertex1 vertex2 (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
-        pg.Graph
-        |> Graph.findEdges vertex1 vertex2
-        |> Option.map (Set.map (fun edge -> edge, Map.find edge pg.Edges))
+    let findEdges vertex1 vertex2 (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) = option {
+        do! containsVertex vertex1 pg |> Result.requireTrue () |> Option.ofResult
+        do! containsVertex vertex2 pg |> Result.requireTrue () |> Option.ofResult
+
+        return!
+            pg
+            |> adjacency vertex1
+            |> Option.map (Set.filter (fun (_, _, v, _) -> v = vertex2))
+            |> Option.map (Set.map (fun (e, edata, _, _) -> e, edata))
+    }
+
+    //let findEdges vertex1 vertex2 (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    //    pg.Graph
+    //    |> Graph.findEdges vertex1 vertex2
+    //    |> Option.map (Set.map (fun edge -> edge, Map.find edge pg.Edges))
 
     /// Add a vertex to the property graph, replacing the data if it already exists.
     let addVertex vertex data (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
@@ -89,7 +100,7 @@ module PropertyGraph =
     
     /// Remove a vertex and all its associated edges from the property graph, doing nothing if it doesn't exist.
     let removeVertex vertex (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
-        match Graph.getIncidentEdges vertex pg.Graph with
+        match Graph.incidentEdges vertex pg.Graph with
         | None -> pg
         | Some incidentEdges ->
             let graph = Graph.removeVertex vertex pg.Graph

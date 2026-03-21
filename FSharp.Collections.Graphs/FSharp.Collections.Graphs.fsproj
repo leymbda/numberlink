@@ -1,17 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ProjectGuid>{7b06ebed-fd30-4821-ae09-f882e18236c4}</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="Graph.fs" />
     <Compile Include="PropertyGraph.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />
   </ItemGroup>
-
 </Project>

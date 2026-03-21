@@ -19,13 +19,13 @@ module Graph =
         Map.isEmpty graph.Vertices
 
     /// Get the edges incident to a vertex, returning None if the vertex is not found.
-    let getIncidentEdges vertex (graph: Graph<'v, 'e>) =
+    let incidentEdges vertex (graph: Graph<'v, 'e>) =
         Map.tryFind vertex graph.Vertices
 
     /// Get edge/neighbor pairs for all edges incident to a vertex, returning None if the vertex is not found.
-    let incidentNeighbors vertex (graph: Graph<'v, 'e>) =
+    let adjacency vertex (graph: Graph<'v, 'e>) =
         graph
-        |> getIncidentEdges vertex
+        |> incidentEdges vertex
         |> Option.map (Set.map (fun edge ->
             let v1, v2 = Map.find edge graph.Edges
             edge, if v1 = vertex then v2 else v1
@@ -34,7 +34,7 @@ module Graph =
     /// Get the neighboring vertices of a vertex, returning None if the vertex is not found.
     let neighbors vertex (graph: Graph<'v, 'e>) =
         graph
-        |> getIncidentEdges vertex
+        |> incidentEdges vertex
         |> Option.map (Set.map (fun edge ->
             let v1, v2 = Map.find edge graph.Edges
             if v1 = vertex then v2 else v1
@@ -43,7 +43,7 @@ module Graph =
     /// Get the degree of a vertex, returning None if the vertex is not found.
     let degree vertex (graph: Graph<'v, 'e>) =
         graph
-        |> getIncidentEdges vertex
+        |> incidentEdges vertex
         |> Option.map Set.count
 
     /// Check if a vertex exists in the graph.
@@ -65,14 +65,17 @@ module Graph =
         |> Option.map (Set.contains vertex2)
 
     /// Get the edges connecting two adjacent vertices, returning None if either vertex is not found.
-    let findEdges vertex1 vertex2 (graph: Graph<'v, 'e>) =
-        graph
-        |> getIncidentEdges vertex1
-        |> Option.map (Set.filter (fun edge ->
-            let v1, v2 = Map.find edge graph.Edges
-            (v1 = vertex1 && v2 = vertex2) || (v1 = vertex2 && v2 = vertex1)
-        ))
-        
+    let findEdges vertex1 vertex2 (graph: Graph<'v, 'e>) = option {
+        do! containsVertex vertex1 graph |> Result.requireTrue () |> Option.ofResult
+        do! containsVertex vertex2 graph |> Result.requireTrue () |> Option.ofResult
+
+        return!
+            graph
+            |> adjacency vertex1
+            |> Option.map (Set.filter (fun (_, v) -> v = vertex2))
+            |> Option.map (Set.map fst)
+    }
+    
     /// Add a vertex to the graph, doing nothing if it already exists.
     let addVertex vertex (graph: Graph<'v, 'e>) =
         match containsVertex vertex graph with
@@ -99,7 +102,7 @@ module Graph =
 
     /// Remove a vertex and all its associated edges from the graph, doing nothing if it doesn't exist.
     let removeVertex vertex (graph: Graph<'v, 'e>) =
-        match getIncidentEdges vertex graph with
+        match incidentEdges vertex graph with
         | None -> graph
         | Some edges ->
             let vertices =
@@ -203,7 +206,7 @@ module Graph =
 
                 let newNeighbors =
                     graph
-                    |> incidentNeighbors vertex
+                    |> adjacency vertex
                     |> Option.defaultValue Set.empty
                     |> Set.fold (fun acc (edge, nv) ->
                         match not (Set.contains nv seen) && predicate vertex edge nv with

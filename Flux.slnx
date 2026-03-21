@@ -6,10 +6,10 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="Tests/FSharp.Collections.Graphs.Tests.Unit/FSharp.Collections.Graphs.Tests.Unit.fsproj" Id="25562f02-ba21-4993-a0d2-5a0a262e1b97" />
+    <Project Path="Tests/FSharp.Collections.Graphs.Tests.Unit/FSharp.Collections.Graphs.Tests.Unit.fsproj" />
   </Folder>
-  <Project Path="FSharp.Collections.Graphs/FSharp.Collections.Graphs.fsproj" Id="15d1e858-4edc-4897-b961-0933366ae317" />
-  <Project Path="Numberlink.ZigZag.Core/Numberlink.ZigZag.Core.fsproj" Id="d14da3c0-875b-49b4-a9cb-57b7271a958e" />
-  <Project Path="Numberlink.ZigZag.Generator/Numberlink.ZigZag.Generator.fsproj" Id="ad60af81-18c5-4d10-acaf-87b1ec4cfe69" />
-  <Project Path="Numberlink.ZigZag.Solver/Numberlink.ZigZag.Solver.fsproj" Id="95474275-6bfd-4e98-8ed3-c90a61af882e" />
+  <Project Path="FSharp.Collections.Graphs/FSharp.Collections.Graphs.fsproj" />
+  <Project Path="Numberlink.ZigZag.Core/Numberlink.ZigZag.Core.fsproj" />
+  <Project Path="Numberlink.ZigZag.Generator/Numberlink.ZigZag.Generator.fsproj" />
+  <Project Path="Numberlink.ZigZag.Solver/Numberlink.ZigZag.Solver.fsproj" />
 </Solution>
