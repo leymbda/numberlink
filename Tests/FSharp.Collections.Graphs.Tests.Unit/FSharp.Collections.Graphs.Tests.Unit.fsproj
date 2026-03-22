@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GraphTests.fs" />
+    <Compile Include="GraphBuilderTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />

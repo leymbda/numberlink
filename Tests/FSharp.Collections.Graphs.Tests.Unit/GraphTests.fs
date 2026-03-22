@@ -5,23 +5,22 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 [<TestClass>]
 type GraphTests() =
     let graph =
-        Graph.empty<int, int>
-        |> Graph.addVertex 1
-        |> Graph.addVertex 2
-        |> Graph.addVertex 3
-        |> Graph.addVertex 4
-        |> Graph.addVertex 5
-        |> Graph.addVertex 6
-        |> Graph.addVertex 7
-        |> Graph.addEdge 1 1 2
-        |> Result.bind (Graph.addEdge 2 1 3)
-        |> Result.bind (Graph.addEdge 3 1 4)
-        |> Result.bind (Graph.addEdge 4 3 6)
-        |> Result.bind (Graph.addEdge 5 3 6)
-        |> Result.bind (Graph.addEdge 6 6 7)
+        graph {
+            let! v1 = 1
+            let! v2 = 2
+            let! v3 = 3
+            let! v4 = 4
+            let! _ = 5
+            let! v6 = 6
+            let! v7 = 7
+            do! 1, v1, v2
+            do! 2, v1, v3
+            do! 3, v1, v4
+            do! 4, v3, v6
+            do! 5, v3, v6
+            do! 6, v6, v7
+        }
         |> Result.defaultWith (fun _ -> failwith "Invalid graph")
-
-        // TODO: Computation expression to build graphs (base off TemplateBuilder, consider decide/evolve pattern)
 
     [<TestMethod>]
     member _.``isEmpty - Returns true for empty graph``() =
@@ -607,7 +606,7 @@ type GraphTests() =
             true
 
         // Act
-        let res = Graph.bfs 6 predicate graph
+        let res = Graph.bfs 5 predicate graph
 
         // Assert
         Assert.AreEqual(Seq.empty |> Seq.toList, res |> Seq.toList)

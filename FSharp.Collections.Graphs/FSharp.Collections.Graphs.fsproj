@@ -6,7 +6,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Graph.fs" />
+    <Compile Include="GraphBuilder.fs" />
     <Compile Include="PropertyGraph.fs" />
+    <Compile Include="PropertyGraphBuilder.fs" />
     <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />
   </ItemGroup>
 </Project>
