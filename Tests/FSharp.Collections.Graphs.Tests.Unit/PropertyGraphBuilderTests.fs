@@ -3,22 +3,22 @@ namespace FSharp.Collections.Graphs
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
-type GraphBuilderTests() =
+type PropertyGraphBuilderTests() =
     [<TestMethod>]
     member _.``Returns VertexAlreadyExists error if vertex is added twice``() =
         // Arrange
 
         // Act
-        let res = graph<int, int> {
-            let! v1 = 1
-            let! v2 = 2
-            let! _ = 1
-            do! 1, v1, v2
+        let res = propertyGraph<int, unit, int, unit> {
+            let! v1 = 1, ()
+            let! v2 = 2, ()
+            let! _ = 1, ()
+            do! 1, (), v1, v2
         }
         
         // Assert
         match res with
-        | Error (GraphBuilderError.VertexAlreadyExists v) -> Assert.AreEqual(1, v)
+        | Error (PropertyGraphBuilderError.VertexAlreadyExists v) -> Assert.AreEqual(1, v)
         | _ -> Assert.Fail("Expected VertexAlreadyExists error")
         
     [<TestMethod>]
@@ -26,16 +26,16 @@ type GraphBuilderTests() =
         // Arrange
 
         // Act
-        let res = graph<int, int> {
-            let! v1 = 1
-            let! v2 = 2
-            do! 1, v1, v2
-            do! 1, v1, v2
+        let res = propertyGraph<int, unit, int, unit> {
+            let! v1 = 1, ()
+            let! v2 = 2, ()
+            do! 1, (), v1, v2
+            do! 1, (), v1, v2
         }
         
         // Assert
         match res with
-        | Error (GraphBuilderError.EdgeAlreadyExists e) -> Assert.AreEqual(1, e)
+        | Error (PropertyGraphBuilderError.EdgeAlreadyExists e) -> Assert.AreEqual(1, e)
         | _ -> Assert.Fail("Expected EdgeAlreadyExists error")
         
     [<TestMethod>]
@@ -43,13 +43,13 @@ type GraphBuilderTests() =
         // Arrange
 
         // Act
-        let res = graph<int, int> {
-            do! 1, 1, 2
+        let res =  propertyGraph<int, unit, int, unit> {
+            do! 1, (), 1, 2
         }
         
         // Assert
         match res with
-        | Error (GraphBuilderError.InvalidEdgeConnection (e, missing)) ->
+        | Error (PropertyGraphBuilderError.InvalidEdgeConnection (e, missing)) ->
             Assert.AreEqual(1, e)
             Assert.IsTrue(missing.Contains(1))
             Assert.IsTrue(missing.Contains(2))
@@ -61,14 +61,14 @@ type GraphBuilderTests() =
         // Arrange
 
         // Act
-        let res = graph<int, int> {
-            let! v2 = 2
-            do! 1, 1, v2
+        let res = propertyGraph<int, unit, int, unit> {
+            let! v2 = 2, ()
+            do! 1, (), 1, v2
         }
         
         // Assert
         match res with
-        | Error (GraphBuilderError.InvalidEdgeConnection (e, missing)) ->
+        | Error (PropertyGraphBuilderError.InvalidEdgeConnection (e, missing)) ->
             Assert.AreEqual(1, e)
             Assert.IsTrue(missing.Contains(1))
             Assert.IsFalse(missing.Contains(2))
@@ -80,14 +80,14 @@ type GraphBuilderTests() =
         // Arrange
 
         // Act
-        let res = graph<int, int> {
-            let! v1 = 1
-            do! 1, v1, 2
+        let res = propertyGraph<int, unit, int, unit> {
+            let! v1 = 1, ()
+            do! 1, (), v1, 2
         }
         
         // Assert
         match res with
-        | Error (GraphBuilderError.InvalidEdgeConnection (e, missing)) ->
+        | Error (PropertyGraphBuilderError.InvalidEdgeConnection (e, missing)) ->
             Assert.AreEqual(1, e)
             Assert.IsFalse(missing.Contains(1))
             Assert.IsTrue(missing.Contains(2))
@@ -99,16 +99,16 @@ type GraphBuilderTests() =
         // Arrange
 
         // Act
-        let res = graph<int, int> {
-            let! v1 = 1
-            let! v2 = 2
-            do! 1, v1, v2
+        let res = propertyGraph<int, unit, int, unit> {
+            let! v1 = 1, ()
+            let! v2 = 2, ()
+            do! 1, (), v1, v2
         }
         
         // Assert
         match res with
         | Error _ -> Assert.Fail("Expected successful graph construction")
-        | Ok graph ->
-            Assert.IsTrue(Graph.containsVertex 1 graph)
-            Assert.IsTrue(Graph.containsVertex 2 graph)
-            Assert.IsTrue(Graph.containsEdge 1 graph)
+        | Ok pg ->
+            Assert.IsTrue(PropertyGraph.containsVertex 1 pg)
+            Assert.IsTrue(PropertyGraph.containsVertex 2 pg)
+            Assert.IsTrue(PropertyGraph.containsEdge 1 pg)

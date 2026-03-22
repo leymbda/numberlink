@@ -588,7 +588,7 @@ type GraphTests() =
     [<TestMethod>]
     member _.``bfs - Returns empty seq if vertex does not exist``() =
         // Arrange
-        let predicate = fun v1 e v2 ->
+        let predicate = fun _ _ _ ->
             true
 
         // Act
@@ -602,7 +602,7 @@ type GraphTests() =
         // Arrange
         let graph = Graph.empty<int, int>
 
-        let predicate = fun v1 e v2 ->
+        let predicate = fun _ _ _ ->
             true
 
         // Act
@@ -614,7 +614,7 @@ type GraphTests() =
     [<TestMethod>]
     member _.``bfs - Returns correct vertices in BFS order``() =
         // Arrange
-        let predicate = fun v1 e v2 ->
+        let predicate = fun _ _ _ ->
             true
 
         // Act
@@ -626,7 +626,7 @@ type GraphTests() =
     [<TestMethod>]
     member _.``bfs - Returns correct vertices in BFS order with predicate removing some``() =
         // Arrange
-        let predicate = fun v1 e v2 ->
+        let predicate = fun _ e _ ->
             e <> 3
 
         // Act
@@ -638,7 +638,7 @@ type GraphTests() =
     [<TestMethod>]
     member _.``isConnected - Returns false if vertices not connected by the predicate``() =
         // Arrange
-        let predicate = fun v1 e v2 ->
+        let predicate = fun _ _ _ ->
             true
 
         // Act
@@ -650,7 +650,7 @@ type GraphTests() =
     [<TestMethod>]
     member _.``isConnected - Returns true if vertices connected without predicate filter``() =
         // Arrange
-        let predicate = fun v1 e v2 ->
+        let predicate = fun _ _ _ ->
             true
 
         // Act
@@ -662,7 +662,7 @@ type GraphTests() =
     [<TestMethod>]
     member _.``isConnected - Returns false if vertices connected but removed through predicate``() =
         // Arrange
-        let predicate = fun v1 e v2 ->
+        let predicate = fun _ e _ ->
             e <> 6
 
         // Act
