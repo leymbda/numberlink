@@ -12,11 +12,13 @@ type GraphTests() =
         |> Graph.addVertex 4
         |> Graph.addVertex 5
         |> Graph.addVertex 6
+        |> Graph.addVertex 7
         |> Graph.addEdge 1 1 2
         |> Result.bind (Graph.addEdge 2 1 3)
         |> Result.bind (Graph.addEdge 3 1 4)
         |> Result.bind (Graph.addEdge 4 3 6)
         |> Result.bind (Graph.addEdge 5 3 6)
+        |> Result.bind (Graph.addEdge 6 6 7)
         |> Result.defaultWith (fun _ -> failwith "Invalid graph")
 
         // TODO: Computation expression to build graphs (base off TemplateBuilder, consider decide/evolve pattern)
@@ -285,4 +287,387 @@ type GraphTests() =
         // Assert
         Assert.AreEqual(Some (Set.ofList [4; 5]), res)
 
-    // TODO: Tests for remaining functions
+    [<TestMethod>]
+    member _.``addVertex - Does not modify graph if vertex already exists``() =
+        // Arrange
+        let graph =
+            Graph.empty<int, int>
+            |> Graph.addVertex 1
+
+        // Act
+        let res = Graph.addVertex 1 graph
+
+        // Assert
+        Assert.AreEqual(1, Graph.countVertices res)
+        Assert.IsTrue(Graph.containsVertex 1 res)
+
+    [<TestMethod>]
+    member _.``addVertex - Adds vertex to graph``() =
+        // Arrange
+        let graph = Graph.empty<int, int>
+
+        // Act
+        let res = Graph.addVertex 1 graph
+
+        // Assert
+        Assert.AreEqual(1, Graph.countVertices res)
+        Assert.IsTrue(Graph.containsVertex 1 res)
+
+    [<TestMethod>]
+    member _.``addEdge - Returns error if either vertex doesn't exist``() =
+        // Arrange
+        let graph = Graph.empty<int, int>
+
+        // Act
+        let res = Graph.addEdge 1 1 2 graph
+
+        // Assert
+        Assert.IsTrue(Result.isError res)
+
+    [<TestMethod>]
+    member _.``addEdge - Adds another edge even if an edge between the same vertices already exists``() =
+        // Arrange
+        let graph =
+            Graph.empty<int, int>
+            |> Graph.addVertex 1
+            |> Graph.addVertex 2
+            |> Graph.addEdge 1 1 2
+            |> Result.toOption
+            |> Option.get
+
+        // Act
+        let res = Graph.addEdge 2 1 2 graph
+
+        // Assert
+        match res with
+        | Error _ -> Assert.Fail("Expected Ok result")
+        | Ok g ->
+            Assert.AreEqual(2, Graph.countEdges g)
+            Assert.IsTrue(Graph.containsEdge 2 g)
+            Assert.AreEqual(2, Graph.findEdges 1 2 g |> Option.get |> Set.count)
+
+    [<TestMethod>]
+    member _.``addEdge - Adds edge to graph``() =
+        // Arrange
+        let graph =
+            Graph.empty<int, int>
+            |> Graph.addVertex 1
+            |> Graph.addVertex 2
+
+        // Act
+        let res = Graph.addEdge 1 1 2 graph
+
+        // Assert
+        match res with
+        | Error _ -> Assert.Fail("Expected Ok result")
+        | Ok g ->
+            Assert.AreEqual(1, Graph.countEdges g)
+            Assert.IsTrue(Graph.containsEdge 1 g)
+
+    [<TestMethod>]
+    member _.``removeVertex - Does not modify graph if vertex doesn't exist``() =
+        // Arrange
+        let graph =
+            Graph.empty<int, int>
+            |> Graph.addVertex 1
+
+        // Act
+        let res = Graph.removeVertex 2 graph
+
+        // Assert
+        Assert.AreEqual(1, Graph.countVertices res)
+        Assert.IsTrue(Graph.containsVertex 1 res)
+
+    [<TestMethod>]
+    member _.``removeVertex - Removes vertex and its edges from graph``() =
+        // Arrange
+        let graph =
+            Graph.empty<int, int>
+            |> Graph.addVertex 1
+            |> Graph.addVertex 2
+            |> Graph.addEdge 1 1 2
+            |> Result.toOption
+            |> Option.get
+
+        // Act
+        let res = Graph.removeVertex 1 graph
+
+        // Assert
+        Assert.AreEqual(1, Graph.countVertices res)
+        Assert.IsFalse(Graph.containsVertex 1 res)
+        Assert.IsTrue(Graph.containsVertex 2 res)
+        Assert.AreEqual(0, Graph.countEdges res)
+
+    [<TestMethod>]
+    member _.``removeEdge - Does not modify graph if edge doesn't exist``() =
+        // Arrange
+        let graph =
+            Graph.empty<int, int>
+            |> Graph.addVertex 1
+            |> Graph.addVertex 2
+
+        // Act
+        let res = Graph.removeEdge 1 graph
+
+        // Assert
+        Assert.AreEqual(0, Graph.countEdges res)
+        Assert.AreEqual(0, Graph.countEdges res)
+
+    [<TestMethod>]
+    member _.``removeEdge - Removes edge from graph``() =
+        // Arrange
+        let graph =
+            Graph.empty<int, int>
+            |> Graph.addVertex 1
+            |> Graph.addVertex 2
+            |> Graph.addEdge 1 1 2
+            |> Result.toOption
+            |> Option.get
+
+        // Act
+        let res = Graph.removeEdge 1 graph
+
+        // Assert
+        Assert.AreEqual(0, Graph.countEdges res)
+        Assert.IsFalse(Graph.containsEdge 1 res)
+
+    [<TestMethod>]
+    member _.``vertices - Returns empty seq if no vertices in graph``() =
+        // Arrange
+        let graph = Graph.empty<int, int>
+
+        // Act
+        let res = Graph.vertices graph
+
+        // Assert
+        Assert.AreEqual(Set.empty, res)
+
+    [<TestMethod>]
+    member _.``vertices - Returns all vertices in graph``() =
+        // Arrange
+
+        // Act
+        let res = Graph.vertices graph
+
+        // Assert
+        Assert.AreEqual(Set.ofList [1; 2; 3; 4; 5; 6; 7], res)
+
+    [<TestMethod>]
+    member _.``edges - Returns empty seq if no edges in graph``() =
+        // Arrange
+        let graph = Graph.empty<int, int>
+
+        // Act
+        let res = Graph.edges graph
+
+        // Assert
+        Assert.AreEqual(Set.empty, res)
+
+    [<TestMethod>]
+    member _.``edges - Returns all edges in graph``() =
+        // Arrange
+
+        // Act
+        let res = Graph.edges graph
+
+        // Assert
+        Assert.AreEqual(Set.ofList [1; 2; 3; 4; 5; 6], res)
+
+    [<TestMethod>]
+    member _.``countVertices - Returns 0 for empty graph``() =
+        // Arrange
+        let graph = Graph.empty<int, int>
+
+        // Act
+        let res = Graph.countVertices graph
+
+        // Assert
+        Assert.AreEqual(0, res)
+
+    [<TestMethod>]
+    member _.``countVertices - Returns correct count for non-empty graph``() =
+        // Arrange
+
+        // Act
+        let res = Graph.countVertices graph
+
+        // Assert
+        Assert.AreEqual(7, res)
+
+    [<TestMethod>]
+    member _.``countEdges - Returns 0 for empty graph``() =
+        // Arrange
+        let graph = Graph.empty<int, int>
+
+        // Act
+        let res = Graph.countEdges graph
+
+        // Assert
+        Assert.AreEqual(0, res)
+
+    [<TestMethod>]
+    member _.``countEdges - Returns correct count for non-empty graph``() =
+        // Arrange
+
+        // Act
+        let res = Graph.countEdges graph
+
+        // Assert
+        Assert.AreEqual(6, res)
+
+    [<TestMethod>]
+    member _.``filterVertices - Returns empty graph if no vertices satisfy predicate``() =
+        // Arrange
+        let predicate = fun v ->
+            v > 10
+
+        // Act
+        let res = Graph.filterVertices predicate graph
+
+        // Assert
+        Assert.IsTrue(Graph.isEmpty res)
+
+    [<TestMethod>]
+    member _.``filterVertices - Returns correct subgraph for vertices that satisfy predicate``() =
+        // Arrange
+        let predicate = fun v ->
+            v % 2 = 1
+
+        // Act
+        let res = Graph.filterVertices predicate graph
+
+        // Assert
+        Assert.AreEqual(Set.ofList [1; 3; 5; 7], Graph.vertices res)
+        Assert.AreEqual(Set.ofList [2], Graph.edges res)
+
+    [<TestMethod>]
+    member _.``filterEdges - Returns graph with all edges removed if no edges satisfy predicate``() =
+        // Arrange
+        let predicate = fun e ->
+            e > 10
+
+        // Act
+        let res = Graph.filterEdges predicate graph
+
+        // Assert
+        Assert.AreEqual(0, Graph.countEdges res)
+
+    [<TestMethod>]
+    member _.``filterEdges - Returns correct subgraph for edges that satisfy predicate``() =
+        // Arrange
+        let predicate = fun e ->
+            e % 2 = 0
+
+        // Act
+        let res = Graph.filterEdges predicate graph
+
+        // Assert
+        Assert.AreEqual(Set.ofList [1; 2; 3; 4; 5; 6; 7], Graph.vertices res)
+        Assert.AreEqual(Set.ofList [2; 4; 6], Graph.edges res)
+
+    [<TestMethod>]
+    member _.``inducedSubgraph - Returns empty graph if no vertices in subset``() =
+        // Arrange
+
+        // Act
+        let res = Graph.inducedSubgraph (Set.ofList [0; -1]) graph
+
+        // Assert
+        Assert.IsTrue(Graph.isEmpty res)
+
+    [<TestMethod>]
+    member _.``inducedSubgraph - Returns correct subgraph for subset of vertices``() =
+        // Arrange
+
+        // Act
+        let res = Graph.inducedSubgraph (Set.ofList [1; 3; 5]) graph
+
+        // Assert
+        Assert.AreEqual(Set.ofList [1; 3; 5], Graph.vertices res)
+        Assert.AreEqual(Set.ofList [2], Graph.edges res)
+        
+    [<TestMethod>]
+    member _.``bfs - Returns empty seq if vertex does not exist``() =
+        // Arrange
+        let predicate = fun v1 e v2 ->
+            true
+
+        // Act
+        let res = Graph.bfs 0 predicate graph
+
+        // Assert
+        Assert.AreEqual(Seq.empty |> Seq.toList, res |> Seq.toList)
+        
+    [<TestMethod>]
+    member _.``bfs - Returns empty seq if vertex has no neighbors``() =
+        // Arrange
+        let graph = Graph.empty<int, int>
+
+        let predicate = fun v1 e v2 ->
+            true
+
+        // Act
+        let res = Graph.bfs 6 predicate graph
+
+        // Assert
+        Assert.AreEqual(Seq.empty |> Seq.toList, res |> Seq.toList)
+
+    [<TestMethod>]
+    member _.``bfs - Returns correct vertices in BFS order``() =
+        // Arrange
+        let predicate = fun v1 e v2 ->
+            true
+
+        // Act
+        let res = Graph.bfs 1 predicate graph
+
+        // Assert
+        Assert.AreEqual(Seq.ofList [1; 4; 3; 2; 6; 7] |> Seq.toList, res |> Seq.toList)
+
+    [<TestMethod>]
+    member _.``bfs - Returns correct vertices in BFS order with predicate removing some``() =
+        // Arrange
+        let predicate = fun v1 e v2 ->
+            e <> 3
+
+        // Act
+        let res = Graph.bfs 1 predicate graph
+
+        // Assert
+        Assert.AreEqual(Seq.ofList [1; 3; 2; 6; 7] |> Seq.toList, res |> Seq.toList)
+
+    [<TestMethod>]
+    member _.``isConnected - Returns false if vertices not connected by the predicate``() =
+        // Arrange
+        let predicate = fun v1 e v2 ->
+            true
+
+        // Act
+        let res = Graph.isConnected 1 5 predicate graph
+
+        // Assert
+        Assert.IsFalse(res)
+
+    [<TestMethod>]
+    member _.``isConnected - Returns true if vertices connected without predicate filter``() =
+        // Arrange
+        let predicate = fun v1 e v2 ->
+            true
+
+        // Act
+        let res = Graph.isConnected 1 7 predicate graph
+
+        // Assert
+        Assert.IsTrue(res)
+
+    [<TestMethod>]
+    member _.``isConnected - Returns false if vertices connected but removed through predicate``() =
+        // Arrange
+        let predicate = fun v1 e v2 ->
+            e <> 6
+
+        // Act
+        let res = Graph.isConnected 1 7 predicate graph
+
+        // Assert
+        Assert.IsFalse(res)

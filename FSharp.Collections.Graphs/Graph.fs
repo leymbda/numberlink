@@ -65,16 +65,14 @@ module Graph =
         |> Option.map (Set.contains vertex2)
 
     /// Get the edges connecting two adjacent vertices, returning None if either vertex is not found.
-    let findEdges vertex1 vertex2 (graph: Graph<'v, 'e>) = option {
-        do! containsVertex vertex1 graph |> Result.requireTrue () |> Option.ofResult
-        do! containsVertex vertex2 graph |> Result.requireTrue () |> Option.ofResult
-
-        return!
+    let findEdges vertex1 vertex2 (graph: Graph<'v, 'e>) =
+        if containsVertex vertex1 graph && containsVertex vertex2 graph then
             graph
             |> adjacency vertex1
             |> Option.map (Set.filter (fun (_, v) -> v = vertex2))
             |> Option.map (Set.map fst)
-    }
+        else
+            None
     
     /// Add a vertex to the graph, doing nothing if it already exists.
     let addVertex vertex (graph: Graph<'v, 'e>) =
@@ -141,38 +139,6 @@ module Graph =
     let countEdges (graph: Graph<'v, 'e>) =
         Map.count graph.Edges
 
-    /// Fold over the vertices of the graph.
-    let inline foldVertices folder state (graph: Graph<'v, 'e>) =
-        Map.fold (fun acc vertex _ -> folder acc vertex) state graph.Vertices
-
-    /// Fold over the edges of the graph.
-    let inline foldEdges folder state (graph: Graph<'v, 'e>) =
-        Map.fold (fun acc edge _ -> folder acc edge) state graph.Edges
-
-    /// Iterate over the vertices of the graph.
-    let inline iterVertices action (graph: Graph<'v, 'e>) =
-        Map.iter (fun vertex _ -> action vertex) graph.Vertices
-
-    /// Iterate over the edges of the graph.
-    let inline iterEdges action (graph: Graph<'v, 'e>) =
-        Map.iter (fun edge _ -> action edge) graph.Edges
-
-    /// Check if any vertex satisfies a predicate.
-    let inline existsVertex predicate (graph: Graph<'v, 'e>) =
-        Map.exists (fun vertex _ -> predicate vertex) graph.Vertices
-
-    /// Check if any edge satisfies a predicate.
-    let inline existsEdge predicate (graph: Graph<'v, 'e>) =
-        Map.exists (fun edge _ -> predicate edge) graph.Edges
-
-    /// Check if all vertices satisfy a predicate.
-    let inline forallVertices predicate (graph: Graph<'v, 'e>) =
-        Map.forall (fun vertex _ -> predicate vertex) graph.Vertices
-
-    /// Check if all edges satisfy a predicate.
-    let inline forallEdges predicate (graph: Graph<'v, 'e>) =
-        Map.forall (fun edge _ -> predicate edge) graph.Edges
-
     /// Filter the vertices of the graph, removing those that do not satisfy a predicate (and therefore any connected
     /// edges).
     let inline filterVertices predicate (graph: Graph<'v, 'e>) =
@@ -213,6 +179,7 @@ module Graph =
                         | true -> nv :: acc
                         | false -> acc
                     ) []
+                    |> List.distinct
 
                 let seen = List.fold (fun s nv -> Set.add nv s) seen newNeighbors
                 yield! loop (rest @ newNeighbors) seen
