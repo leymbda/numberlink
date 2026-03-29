@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/FSharp.Collections.Graphs.Tests.Unit/FSharp.Collections.Graphs.Tests.Unit.fsproj" />
+    <Project Path="Tests/Numberlink.ZigZag.Solver.Tests.Unit/Numberlink.ZigZag.Solver.Tests.Unit.fsproj" />
   </Folder>
   <Project Path="FSharp.Collections.Graphs/FSharp.Collections.Graphs.fsproj" />
   <Project Path="Numberlink.ZigZag.Core/Numberlink.ZigZag.Core.fsproj" />
