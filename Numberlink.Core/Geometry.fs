@@ -1,4 +1,4 @@
-namespace Numberlink.ZigZag.Core
+namespace Numberlink.Core
 
 /// A 2D Cartesian coordinate for square orthogonal grid layouts, where each interior vertex has four neighbours.
 [<Struct>]

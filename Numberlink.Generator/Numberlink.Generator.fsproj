@@ -1,15 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+    
   <ItemGroup>
     <Compile Include="Template.fs" />
     <Compile Include="TemplateBuilder.fs" />
   </ItemGroup>
+    
   <ItemGroup>
     <ProjectReference Include="..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />
-    <ProjectReference Include="..\Numberlink.ZigZag.Core\Numberlink.ZigZag.Core.fsproj" />
-    <ProjectReference Include="..\Numberlink.ZigZag.Solver\Numberlink.ZigZag.Solver.fsproj" />
+    <ProjectReference Include="..\Numberlink.Core\Numberlink.Core.fsproj" />
+    <ProjectReference Include="..\Numberlink.Solver\Numberlink.Solver.fsproj" />
   </ItemGroup>
+    
 </Project>

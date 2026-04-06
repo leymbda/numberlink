@@ -1,7 +1,7 @@
-namespace Numberlink.ZigZag.Generator
+namespace Numberlink.Generator
 
 open FsToolkit.ErrorHandling
-open Numberlink.ZigZag.Core
+open Numberlink.Core
 
 type TemplateState<'P> = {
     Template: Template<'P>

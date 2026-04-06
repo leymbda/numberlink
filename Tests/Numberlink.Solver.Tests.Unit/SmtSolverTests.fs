@@ -1,9 +1,9 @@
-namespace Numberlink.ZigZag.Solver
+namespace Numberlink.Solver
 
 open FSharp.Collections.Graphs
 open FsToolkit.ErrorHandling
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Numberlink.ZigZag.Core
+open Numberlink.Core
 
 [<TestClass>]
 type SmtSolverTests() =
@@ -610,7 +610,6 @@ type SmtSolverTests() =
         // Assert
         assertSatisfiable res
         
-
     [<TestMethod>]
     member _.``Valid shapes puzzles is satisfiable``() =
         // Arrange

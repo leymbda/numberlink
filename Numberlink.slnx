@@ -1,16 +1,15 @@
 <Solution>
   <Folder Name="/Non Solution Files/">
     <File Path=".gitignore" />
-    <File Path="AGENTS.md" />
     <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/FSharp.Collections.Graphs.Tests.Unit/FSharp.Collections.Graphs.Tests.Unit.fsproj" />
-    <Project Path="Tests/Numberlink.ZigZag.Solver.Tests.Unit/Numberlink.ZigZag.Solver.Tests.Unit.fsproj" />
+    <Project Path="Tests/Numberlink.Solver.Tests.Unit/Numberlink.Solver.Tests.Unit.fsproj" />
   </Folder>
   <Project Path="FSharp.Collections.Graphs/FSharp.Collections.Graphs.fsproj" />
-  <Project Path="Numberlink.ZigZag.Core/Numberlink.ZigZag.Core.fsproj" />
-  <Project Path="Numberlink.ZigZag.Generator/Numberlink.ZigZag.Generator.fsproj" />
-  <Project Path="Numberlink.ZigZag.Solver/Numberlink.ZigZag.Solver.fsproj" />
+  <Project Path="Numberlink.Core/Numberlink.Core.fsproj" />
+  <Project Path="Numberlink.Generator/Numberlink.Generator.fsproj" />
+  <Project Path="Numberlink.Solver/Numberlink.Solver.fsproj" />
 </Solution>

@@ -1,4 +1,4 @@
-namespace Numberlink.ZigZag.Core
+namespace Numberlink.Core
 
 open FSharp.Collections.Graphs
 
@@ -18,7 +18,7 @@ type PuzzleEdge =
     | Warp
     | BridgeLane of Lane
 
-/// A Zig-Zag Numberlink puzzle.
+/// An Numberlink puzzle.
 type Puzzle<'P> = {
     Graph: PropertyGraph<Vertex, PuzzleVertex, Edge, PuzzleEdge>
     Positions: Map<Vertex, 'P>

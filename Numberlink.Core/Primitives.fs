@@ -1,4 +1,4 @@
-namespace Numberlink.ZigZag.Core
+namespace Numberlink.Core
 
 /// An identifier for a vertex.
 type [<Struct>] Vertex = Vertex of int

@@ -1,4 +1,4 @@
-namespace Numberlink.ZigZag.Core
+namespace Numberlink.Core
 
 open FSharp.Collections.Graphs
 
@@ -26,7 +26,7 @@ type SolutionEdge =
     | Warp of Line
     | BridgeLane of Line
     
-/// A complete Zig-Zag Numberlink solution.
+/// A complete Numberlink solution.
 type Solution<'P> = {
     Graph: PropertyGraph<Vertex, SolutionVertex, Edge, SolutionEdge>
     Positions: Map<Vertex, 'P>

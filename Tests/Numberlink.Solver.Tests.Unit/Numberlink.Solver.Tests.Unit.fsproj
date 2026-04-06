@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <TestingExtensionsProfile>AllMicrosoft</TestingExtensionsProfile>
   </PropertyGroup>
 
@@ -13,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Numberlink.ZigZag.Solver\Numberlink.ZigZag.Solver.fsproj" />
+    <ProjectReference Include="..\..\Numberlink.Solver\Numberlink.Solver.fsproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-namespace Numberlink.ZigZag.Core
+namespace Numberlink.Core
 
 /// The multi-commodity flow of a solution, mapping each line to the list of edges that it passes through.
 type Flow = Map<Line, Edge list>

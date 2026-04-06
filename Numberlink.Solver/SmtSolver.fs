@@ -1,8 +1,8 @@
-namespace Numberlink.ZigZag.Solver
+namespace Numberlink.Solver
 
 open FSharp.Collections.Graphs
 open Microsoft.Z3
-open Numberlink.ZigZag.Core
+open Numberlink.Core
 
 [<RequireQualifiedAccess>]
 type SmtSolverError =
@@ -11,7 +11,8 @@ type SmtSolverError =
     | Error of string
 
 module SmtSolver =
-    /// Solve the Numberlink puzzle using an SMT solver. Returns a set of tuples of edges and the line that passes through it.
+    /// Solve the Numberlink puzzle using an SMT solver. Returns the flow if a solution is found, or an error if the
+    /// puzzle is unsatisfiable or an error occurs during solving.
     let solve (puzzle: Puzzle<'P>) =
         try
             use ctx = new Context()
@@ -194,6 +195,8 @@ module SmtSolver =
                 |> Seq.toArray
 
             solver.Add(selfTouchConstraints)
+
+            // TODO: Rank constraint to prevent shadow cycles.
 
             //let terminalSources =
             //    puzzle.Graph

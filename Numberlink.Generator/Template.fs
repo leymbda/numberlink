@@ -1,8 +1,8 @@
-namespace Numberlink.ZigZag.Generator
+namespace Numberlink.Generator
 
 open FSharp.Collections.Graphs
 open FsToolkit.ErrorHandling
-open Numberlink.ZigZag.Core
+open Numberlink.Core
 
 /// A vertex in a template graph, representing a cell in a level.
 [<RequireQualifiedAccess>]
@@ -27,7 +27,7 @@ type TemplateConstraints = {
     LineCount: (int * int) option
 }
 
-/// A partial template which can be filled in by a generator to create a Zig-Zag Numberlink level.
+/// A partial template which can be filled in by a generator to create an Numberlink level.
 type Template<'P> = {
     Graph: PropertyGraph<Vertex, TemplateVertex, Edge, TemplateEdge>
     Positions: Map<Vertex, 'P>

@@ -1,16 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
   <ItemGroup>
-    <Compile Include="Primitives.fs" />
-    <Compile Include="Geometry.fs" />
-    <Compile Include="Flow.fs" />
-    <Compile Include="Puzzle.fs" />
-    <Compile Include="Solution.fs" />
+    <Compile Include="SmtSolver.fs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Z3" Version="4.12.2" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\FSharp.Collections.Graphs\FSharp.Collections.Graphs.fsproj" />
+    <ProjectReference Include="..\Numberlink.Core\Numberlink.Core.fsproj" />
   </ItemGroup>
+
 </Project>
