@@ -193,13 +193,21 @@ module PropertyGraph =
     }
 
     /// Map a function over the vertex data of the property graph.
-    let inline mapVertices mapper (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline mapVertices (mapper: 'v -> 'vdata -> 'udata) (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         let vertices = Map.map mapper pg.Vertices
 
-        { pg with Vertices = vertices }
+        {
+            Graph = pg.Graph
+            Vertices = vertices
+            Edges = pg.Edges
+        }
 
     /// Map a function over the edge data of the property graph.
-    let inline mapEdges mapper (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
+    let inline mapEdges (mapper: 'e -> 'edata -> 'udata) (pg: PropertyGraph<'v, 'vdata, 'e, 'edata>) =
         let edges = Map.map mapper pg.Edges
-
-        { pg with Edges = edges }
+        
+        {
+            Graph = pg.Graph
+            Vertices = pg.Vertices
+            Edges = edges
+        }
